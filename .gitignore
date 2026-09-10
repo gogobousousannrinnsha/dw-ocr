@@ -1,0 +1,18 @@
+# Large release assets and local execution data
+*.zip
+*.7z
+*.whl
+*.xdw
+*.xbd
+*.pdf
+*.log
+*.pyc
+__pycache__/
+/runtime/
+/models/
+/local-data/
+/work/
+.venv*/
+.env
+.env.*
+!.env.example

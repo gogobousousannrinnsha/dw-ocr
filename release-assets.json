@@ -1,0 +1,63 @@
+{
+  "release": "v0.1.0",
+  "public_packaging_revision": "2026-09-10",
+  "assets": [
+    {
+      "name": "ocr_join_tools_20260910_public.zip",
+      "bytes": 5849,
+      "sha256": "a1820b800a8cd999d9b80da05d2ba449b7a3a703b65d02b36b2b5d7682854ebe"
+    },
+    {
+      "name": "ocr_part_001_transport.zip",
+      "bytes": 411104073,
+      "sha256": "7a532c26836f698bd44a2862cf0634790955f4fb3d748cf41c4a06cccdfb7216"
+    },
+    {
+      "name": "ocr_part_002_transport.zip",
+      "bytes": 411104073,
+      "sha256": "2d7a7055d2cc4cdc6dd53dc265f76de4c9e21fd93b2a74e30b302ab16df7c496"
+    },
+    {
+      "name": "ocr_part_003_transport.zip",
+      "bytes": 411104073,
+      "sha256": "8175924768f0dac17077da9736713a68d95699f79674282a924b644892fadee9"
+    },
+    {
+      "name": "ocr_part_004_transport.zip",
+      "bytes": 411104073,
+      "sha256": "b26158fe2ae91f1ca17727aefad91f51c05914218aefb9cdd5797616a48fcf39"
+    },
+    {
+      "name": "ocr_part_005_transport.zip",
+      "bytes": 411104073,
+      "sha256": "823cdfdb6b101d6f8eb0379a674fbc019c32b211f9694499dec3ed1238ba3996"
+    },
+    {
+      "name": "ocr_part_006_transport.zip",
+      "bytes": 411104073,
+      "sha256": "d873a91dbfa29a3364e803c5251a83fe61afcc91af976d21cae02068e5437912"
+    },
+    {
+      "name": "ocr_part_007_transport.zip",
+      "bytes": 411104073,
+      "sha256": "1c1bb104bcc609ea621dc0f66788e86da20a5e8127298779756686ebb3fe96ef"
+    },
+    {
+      "name": "ocr_part_008_transport.zip",
+      "bytes": 411104070,
+      "sha256": "c1ce44a9554edd2a24cf134922c0ffcac95f5469db6cde0012545ad63bac8a7d"
+    },
+    {
+      "name": "third-party-sources-v0.1.0.zip",
+      "bytes": 7263139,
+      "sha256": "e9238d862f3928a3ab1e1dc2de9e622ef54dfe69d24b12d69a2cb149f16fa291"
+    }
+  ],
+  "restored_zip": {
+    "name": "dw_ocr_with_code.zip",
+    "bytes": 3288831413,
+    "sha256": "10e5428a9501ed3f2a754a2eb71d989ae7269d1d220acff428151ec7b6bf59b1",
+    "entries": 29290,
+    "uncompressed_bytes": 5181762391
+  }
+}
