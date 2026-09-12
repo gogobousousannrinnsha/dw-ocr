@@ -1,47 +1,39 @@
-# DW-OCR Portable
+# DW-OCR Portable v0.2.0
 
-Windows x64向けのDocuWorks OCR実行環境です。Python、OCRライブラリ、PP-OCRv6 mediumモデル、DocuWorks連携コードを含みます。
+Windows x64向けの、Python・OCRライブラリ・PP-OCRv6 mediumモデルを含む実行環境です。**v0.2.0はPre-release（試験的リリース）**です。Core 1.0.0 / Integrations 0.6.0を使用します。
 
-**v0.1.0 / 試験的リリース** — 2026-09-09版を基にした**公開梱包版 2026-09-10**です。旧配布物と分割ファイル・結合ツールを混ぜないでください。梱包変更後のGPU・実XDW・Viewer通し試験は未実施です。
+## ダウンロードと最初の実行
 
-## ダウンロードと導入
+[v0.2.0 Release](https://github.com/gogobousousannrinnsha/dw-ocr/releases/tag/v0.2.0)から、`ocr_join_tools.zip`と`ocr_part_001_transport.zip`～`ocr_part_008_transport.zip`の全9ファイルを、旧版と別の空フォルダーへ取得します。
 
-[v0.1.0 Release](https://github.com/gogobousousannrinnsha/dw-ocr/releases/tag/v0.1.0)から、`ocr_join_tools_20260910_public.zip`と`ocr_part_001_transport.zip`～`ocr_part_008_transport.zip`の**全9ファイル**を取得します。ハッシュ資料と第三者対応ソースも同Releaseにあります。
+1. 結合ツールZIPだけを展開し、中のBAT・PowerShell・manifestを8個のtransport ZIPと同じ階層へ置きます。
+2. `join_parts.bat`を実行し、成功表示を確認します。transport ZIPは個別に展開する必要はありません。
+3. 復元された`dw_ocr_with_code.zip`を、新しい書込み可能な短いフォルダーへ展開します。
+4. `verify_environment.bat`で環境を確認します。
+5. 試験用XDWのコピーを`INPUT`へ置き、`OCR開始.bat`を実行します。XDW・フォルダーの複数ドロップにも対応します。
 
-1. 8個のtransport ZIPを同じフォルダーに置きます。
-2. **結合ツールZIPだけを展開**し、中の`join_parts.bat`等を同じ階層に置きます。
-3. `join_parts.bat`を実行し、`SUCCESS: ZIP restored and verified.`を確認します。
-4. `dw_ocr_with_code.zip`を新しいフォルダーに展開します。
-5. `verify_environment.bat`を実行し、試験用XDWのコピーで動作を確認します。
+GitHubの「Source code」ZIPと`dw-ocr-source-v0.2.0.zip`はソースです。Python・GPUライブラリ・モデルを含むPortableとは異なります。分割ファイルと結合ツールは同じReleaseのものだけを組み合わせてください。
 
-GitHubの「Source code」ZIPにはPortable実行環境は入りません。[配布一覧とSHA-256](docs/DISTRIBUTION_FILES.md) / [復元・実行手順](docs/INSTALL_RESTORE.md)
+## 機能
 
-## 機能と必要環境
+- 文書単位で全ページをOCRし、認識領域の矩形付きXDWと確認画像を作成します。原本は変更しません。
+- `settings.ini`で再帰探索、300/600dpi、信頼度、矩形色・余白、日本語フォント、JSONL出力を設定できます。
+- 結果は`OUTPUT/job-.../doc-.../`、再利用できるOCR結果は`runs/job-.../doc-.../`に保存します。
+- 保存runから矩形・確認画像・JSONLを再生成できます。文字や色の確認のたびにOCRをやり直す必要はありません。
+- 旧入口と旧runの利用を継続できます。新しい出力先を使い、run内部は直接編集しません。
 
-全ページをOCRし、認識領域の周囲に赤色・塗りなしの矩形を付けた別XDWを保存します。保存済みのOCR結果から、認識文字を配置した確認画像`text-map.png`と`overlay-text.png`を生成できます。基盤ライブラリはCanonical OCR Result 1.0、JSONL、選択領域のMarker付与も提供します。
+既定は300dpi、INPUT直下のみ、赤い矩形、JSONLなしです。停止後にアプリ全体をまとめて移動できます。
 
-Windows x64、利用権のあるDocuWorks製品と対応x64 XDWAPI、CUDA対応NVIDIA GPU・ドライバーが必要です。Pythonは同梱され、GPU OCRにCPU自動代替はありません。空き容量は**15～20GB程度＋OCR成果物分**が目安です。[必要環境](docs/REQUIREMENTS.md)
+## 必要環境と説明書
 
-## 復元ZIPのSHA-256
+Windows x64、正規のDocuWorks製品と対応x64 XDWAPI、CUDA対応NVIDIA GPU・ドライバー、日本語フォントが必要です。Pythonは同梱されます。15～20GB以上の空き容量に、OCR成果物の保存分を追加してください。GPU OCRにCPUへの自動切替はありません。
 
-公開梱包版の実物を再計算した値です。
+[復元・実行](docs/INSTALL_RESTORE.md) / [設定・API](docs/UNIFIED_0.6.0.md) / [移行](docs/MIGRATION_v0.2.0.md) / [ソース導入・ビルド](docs/SETUP.md) / [配布一覧](docs/DISTRIBUTION_FILES.md) / [検証](docs/VERIFICATION.md) / [制約](docs/KNOWN_LIMITATIONS.md)
 
-```text
-10e5428a9501ed3f2a754a2eb71d989ae7269d1d220acff428151ec7b6bf59b1
-```
+確認画像は組版の再現や校正結果ではありません。XDWの検索用OCRテキスト層を埋め込む機能ではありません。認識文字・矩形位置は利用者が確認してください。
 
-[SHA256SUMS_RESTORED.txt](SHA256SUMS_RESTORED.txt)は結合後ZIP用、[SHA256SUMS_ASSETS.txt](SHA256SUMS_ASSETS.txt)は個別ダウンロード用です。SHA-256は内容一致の検査であり署名ではありません。
+## ライセンス
 
-## 検証と制約
+独自部分は[MIT](LICENSE)、第三者資産はそれぞれの条件です。[適用範囲](LICENSE_NOTICE.md) / [第三者資産・対応ソース](THIRD_PARTY_NOTICES.md)。DocuWorks製品・SDK・DLL、GPUドライバー、Windowsフォントは同梱しません。本ツールは非公式で、現状有姿で提供します。
 
-公開用ZIPのCRC、個別ハッシュ、元のOCRコード・モデルの同一性、結合データのハッシュを検証しました。元の配布環境については利用者から正常実行の報告があります。1ページ23領域の矩形保存・Viewer表示、4ページ377領域の矩形保存は引継ぎ記録です。[検証の範囲](docs/VERIFICATION.md)
-
-OCR結果には誤認識や位置ずれがあり得ます。Viewer編集可否、全環境での動作、ネイティブOCRテキストの埋込みを保証しません。動画入出力とcuDNN開発は対象外です。[既知の制約](docs/KNOWN_LIMITATIONS.md)
-
-## ライセンスと免責
-
-独自コード・結合ツール・文書は[MIT License](LICENSE)です。第三者ライブラリ・モデル・GPUランタイムはそれぞれの条件を保持します。[適用範囲](LICENSE_NOTICE.md) / [第三者資産](THIRD_PARTY_NOTICES.md)
-
-本ツールは非公式です。製品提供元による提供・保証・推奨を示すものではありません。現状有姿で提供し、法令で認められる範囲で正確性、特定目的への適合性、データ保全を保証せず、使用に伴う損害について責任を負いません。原本をバックアップし、結果は利用者が確認してください。
-
-[Issues](https://github.com/gogobousousannrinnsha/dw-ocr/issues)には、実文書、OCR本文、個人パス、資格情報を含めず、版と匿名化した再現手順を記載してください。
+[Issues](https://github.com/gogobousousannrinnsha/dw-ocr/issues)には、版と匿名化した再現手順を記載してください。実文書・OCR本文・個人パス・資格情報は掲載しないでください。

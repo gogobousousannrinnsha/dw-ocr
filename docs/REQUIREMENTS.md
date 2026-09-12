@@ -1,39 +1,7 @@
-# 必要環境と構成
+# 必要環境
 
-## 実行先で用意するもの
+Windows x64、利用権のあるDocuWorks製品と対応x64 XDWAPI、CUDA対応NVIDIA GPU・ドライバー、日本語フォント、書込み可能な短い配置先が必要です。配布物・復元ZIP・展開先に15～20GB以上とOCR成果物分の空き容量を確保します。
 
-| 項目 | 条件・確認範囲 |
-|---|---|
-| OS | Windows x64。Windowsの全版・ビルドの互換表は未作成 |
-| DocuWorks | 利用権のある製品環境と対応するx64 XDWAPI。製品の最小対応版は本配布では未確定 |
-| GPU | CUDA対応NVIDIA GPU。基盤OCR実装はGPU:0を使用し、CPU自動代替なし |
-| ドライバー | 同梱GPUライブラリに対応するNVIDIAドライバー。最小版は未確定 |
-| RAM / VRAM | 最低量・推奨量の実測基準は未確定。GPU全機種での互換性は未確認 |
-| ディスク | 15～20GB程度の空きを目安にし、OCR成果物の保存分を追加 |
-| 実行環境 | WindowsのBAT・PowerShellが利用でき、展開先・出力先へ書込み可能であること |
-| ネットワーク | 配布物取得に必要。結合時は不要。OCR全機能のオフライン保証は未確認 |
+Portable同梱基準はPython 3.13.15、Paddle GPU 3.2.2、CUDA 12.9、cuDNN 9.9.0.52、PaddleOCR 3.7.0、PaddleX 3.7.2、Pillow 12.3.0、PP-OCRv6 medium det/rec、Core 1.0.0、Integrations 0.6.0です。CUDAランタイムは同梱されるため、CUDA Toolkit一式を手動導入することから始める必要はありません。対応ドライバーは別途必要です。
 
-DocuWorks本体・対応XDWAPI・NVIDIAドライバーは実行先で用意する仕様です。SDKを取得しただけで文書操作ができるとは限りません。DocuWorks用DLLを他PCから無断コピーする手順は提供しません。
-
-## 同梱構成
-
-実物のメタデータ・モデル一覧と配布記録を照合した構成です。最新推奨版ではありません。正確なメタデータ一覧は[同梱パッケージ](INSTALLED_PACKAGES.md)を参照してください。
-
-| コンポーネント | 記録上の版・構成 | 根拠 |
-|---|---|---|
-| Python | 3.13.15 x64 | 配布環境の引継ぎ記録・基盤資料 |
-| docuworks-ctypes | 1.0.0 | 現在の基盤メタデータと引継ぎ記録 |
-| docuworks-integrations | 0.3.0 | 現在の基盤メタデータと引継ぎ記録 |
-| PaddlePaddle GPU | 3.2.2 | 引継ぎ記録・基盤資料 |
-| PaddleOCR | 3.7.0 | 引継ぎ記録・基盤資料 |
-| PaddleX | 3.7.2 | 引継ぎ記録・基盤資料 |
-| OCRモデル | PP-OCRv6 medium（det / rec） | 実物のdet / recファイルと基準ハッシュを確認 |
-| CUDA / cuDNN | CUDA 12.9系 / cuDNN 9.9.0.52 | 実物のメタデータとGPUバイナリ一覧を確認 |
-
-実機で`verify_environment.bat`を実行して確認してください。同梱Pythonは`runtime/python.exe`です。依存だけを別版へ入れ替えないでください。
-
-## 容量の意味
-
-公開梱包版の完成ZIPは3,288,831,413バイト、展開内容合計は5,181,762,391バイトです。ファイルシステム使用量や一時領域は別途必要です。15～20GBは余裕を持った目安であり、十分性の保証ではありません。
-
-Core単体のPython 3.10～3.13での試験記録を、Portable GPU環境全体の互換性として読み替えないでください。
+ソースから実行する場合は[SETUP](SETUP.md)に従います。CoreのPython互換性の記録とGPU OCRの実測基準を区別してください。標準GPU OCRにCPUの自動代替はありません。

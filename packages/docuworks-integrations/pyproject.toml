@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docuworks-integrations"
+version = "0.6.0"
+description = "Safe image and OCR adapters for docuworks-ctypes"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = ["docuworks-ctypes>=1.0,<2"]
+
+[project.optional-dependencies]
+review = ["Pillow>=11"]
+ocr = ["paddleocr==3.7.0", "paddlex==3.7.2", "Pillow>=11"]
+opencv = ["opencv-python-headless>=4.8"]
+test = ["pytest>=8", "jsonschema>=4"]
+
+[project.scripts]
+docuworks-integrations = "docuworks_integrations.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["docuworks_integrations*"]
+
+[tool.setuptools.package-data]
+docuworks_integrations = ["*.schema.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["integration: requires DocuWorks and a disposable XDW fixture"]

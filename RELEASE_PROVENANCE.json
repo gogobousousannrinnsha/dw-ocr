@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "release": "v0.2.0",
+  "core_version": "1.0.0",
+  "integrations_version": "0.6.0",
+  "development_commit": "57cf72aec7d5b315c825104fee1f81e604c19b26",
+  "public_base_commit": "bf7adc473f2ba4303ef046c89bf01260822364ab",
+  "baseline_portable_sha256": "10e5428a9501ed3f2a754a2eb71d989ae7269d1d220acff428151ec7b6bf59b1",
+  "verified_candidate_sha256": "009038601d6458d270731fda131df7931ccc5ee4bec5474a20ebd61439149e95",
+  "final_portable": {
+    "name": "dw_ocr_with_code.zip",
+    "bytes": 3223574617,
+    "sha256": "551c190d18bc323c499bfec4b3e21e735891588743384e322733fc639fda577d"
+  },
+  "distributions": [
+    {
+      "name": "docuworks_ctypes-1.0.0-py3-none-any.whl",
+      "bytes": 47483,
+      "sha256": "b03bf617f984999886a1a38cffb00ec8dd396984ee7974594bc50c190d64d6e6"
+    },
+    {
+      "name": "docuworks_ctypes-1.0.0.tar.gz",
+      "bytes": 57208,
+      "sha256": "af434c6918f64edd7a338c6985b2c29f0c7c68adb31fbbbcf1882f65697bcdec"
+    },
+    {
+      "name": "docuworks_integrations-0.6.0-py3-none-any.whl",
+      "bytes": 51520,
+      "sha256": "0977f701e893735d8669b3404923d0f59c3ee677ec6b0e4d4fff79abb3eaa340"
+    },
+    {
+      "name": "docuworks_integrations-0.6.0.tar.gz",
+      "bytes": 54912,
+      "sha256": "4501e0971d40ea4163e462ebbd8bede33fe3946c41f0a003ac7eff361e179a3d"
+    }
+  ],
+  "model_inventory": {
+    "name": "MODEL_HASHES.json",
+    "sha256": "a3a879c02dfaa8fb2921d3b23c77b404685e7b207f5246bd42de334cf53bbd7b"
+  },
+  "source_inventory": "source-manifest.json",
+  "source_archive_excludes": [
+    ".git",
+    "release-assets.json",
+    "SHA256SUMS_ASSETS.txt"
+  ],
+  "approved_packaging_changes": [
+    "PROVENANCE.txt",
+    "README.txt",
+    "ocr_rectangles.bat",
+    "text_maps.bat"
+  ],
+  "packages_and_third_party_unchanged": true,
+  "viewer_confirmation": "Final Portable output confirmed by user; detailed file hashes retained locally."
+}

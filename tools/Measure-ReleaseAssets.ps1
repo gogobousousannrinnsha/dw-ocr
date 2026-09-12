@@ -1,63 +1,34 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $true)][string]$AssetDirectory,
-    [Parameter(Mandatory = $true)][string]$OutputDirectory
+    [Parameter(Mandatory=$true)][string]$AssetDirectory,
+    [Parameter(Mandatory=$true)][string]$OutputDirectory,
+    [string]$ManifestPath = ''
 )
-
-# Measure only the nine designated assets. No upload or archive modification.
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+if ([string]::IsNullOrWhiteSpace($ManifestPath)) { $ManifestPath = Join-Path $PSScriptRoot '..\release-assets.json' }
 $assetRoot = (Resolve-Path -LiteralPath $AssetDirectory).ProviderPath
-if (-not (Test-Path -LiteralPath $assetRoot -PathType Container)) {
-    throw 'AssetDirectory must be a directory.'
-}
-$names = @('ocr_join_tools_20260910_public.zip')
-1..8 | ForEach-Object { $names += ('ocr_part_{0:D3}_transport.zip' -f $_) }
-
-$items = @()
-foreach ($name in $names) {
-    $item = Get-Item -LiteralPath (Join-Path $assetRoot $name)
-    if ($item.PSIsContainer -or $item.Length -le 0) { throw "Invalid asset: $name" }
-    if ($item.Length -ge 2GB) { throw "Asset must be smaller than 2 GiB: $name" }
-    $items += $item
-}
-
-$outRoot = [System.IO.Path]::GetFullPath($OutputDirectory)
-$sumPath = Join-Path $outRoot 'SHA256SUMS_ASSETS.txt'
-$jsonPath = Join-Path $outRoot 'release-assets.json'
-foreach ($path in @($sumPath, $jsonPath)) {
-    if (Test-Path -LiteralPath $path) { throw 'Output already exists; use a new output directory.' }
-}
-
+$manifest = Get-Content -LiteralPath $ManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+if ($manifest.schema_version -ne 1 -or $manifest.release -ne 'v0.2.0') { throw 'Unexpected release manifest.' }
+$outputRoot = [IO.Path]::GetFullPath($OutputDirectory)
+if (Test-Path -LiteralPath $outputRoot) { throw 'Use a new output directory.' }
+$names = @{}
 $records = @()
-foreach ($item in $items) {
-    $digest = (Get-FileHash -LiteralPath $item.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-    $records += [pscustomobject]@{ name = $item.Name; bytes = $item.Length; sha256 = $digest }
+foreach ($asset in $manifest.assets) {
+    $name = [string]$asset.name
+    if ([IO.Path]::GetFileName($name) -cne $name -or $name.Contains(':') -or $names.ContainsKey($name)) { throw 'Unsafe or duplicate asset name.' }
+    $names[$name] = $true
+    $item = Get-Item -LiteralPath (Join-Path $assetRoot $name)
+    if ($item.PSIsContainer -or $item.Length -ne [long]$asset.bytes) { throw "Size mismatch: $name" }
+    $stream = [IO.File]::OpenRead($item.FullName)
+    $algorithm = [Security.Cryptography.SHA256]::Create()
+    try { $hash = [BitConverter]::ToString($algorithm.ComputeHash($stream)).Replace('-', '').ToLowerInvariant() }
+    finally { $algorithm.Dispose(); $stream.Dispose() }
+    if ($hash -cne $asset.sha256) { throw "Hash mismatch: $name" }
+    $records += [pscustomobject]@{ name=$name; bytes=$item.Length; sha256=$hash }
 }
-
-$manifest = [ordered]@{
-    schema_version = 1
-    release = 'v0.1.0'
-    distribution_date = '2026-09-10'
-    measured_at_utc = [DateTime]::UtcNow.ToString('o')
-    status = 'measured_only_not_authenticated_or_privacy_audited'
-    assets = $records
-    restored_zip = [ordered]@{
-        name = 'dw_ocr_with_code.zip'
-        expected_sha256 = '10e5428a9501ed3f2a754a2eb71d989ae7269d1d220acff428151ec7b6bf59b1'
-        source = 'distribution_specification'
-        measured = $false
-    }
-}
-$sumText = (($records | ForEach-Object { $_.sha256 + '  ' + $_.name }) -join "`n") + "`n"
-$jsonText = ($manifest | ConvertTo-Json -Depth 6) + "`n"
-[System.IO.Directory]::CreateDirectory($outRoot) | Out-Null
+[IO.Directory]::CreateDirectory($outputRoot) | Out-Null
+$report = [ordered]@{ schema_version=1; release=$manifest.release; status='HASHES_VERIFIED'; assets=$records }
 $utf8 = New-Object System.Text.UTF8Encoding($false)
-foreach ($entry in @(@($sumPath, $sumText), @($jsonPath, $jsonText))) {
-    $stream = [System.IO.File]::Open($entry[0], [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write)
-    try {
-        $bytes = $utf8.GetBytes($entry[1])
-        $stream.Write($bytes, 0, $bytes.Length)
-    } finally { $stream.Dispose() }
-}
-Write-Output 'Measured 9 assets. This does not authenticate files or audit their contents.'
+[IO.File]::WriteAllText((Join-Path $outputRoot 'measured-assets.json'), (($report | ConvertTo-Json -Depth 6)+"`n"), $utf8)
+Write-Output ("Verified {0} payload assets. This is an integrity check, not authentication or a content audit." -f $records.Count)
