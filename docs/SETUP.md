@@ -68,18 +68,3 @@ py -3.11 -m pip --python .venv-results-retry/Scripts/python.exe install --no-cac
 ```
 
 GPU環境で同じ回避を使う場合は対象venvを分け、同じ `--python` 指定でOCR lock→本体の順に導入します。環境変数はこのPowerShellを閉じると解除されます。
-
-
-## 公開ソースのビルド
-
-リポジトリルートで専用環境を作成します。生成物はGitに追加しません。
-
-```powershell
-py -3.13 -m venv .venv-build
-.\.venv-build\Scripts\python.exe -m pip install -r requirements/dev.txt build twine
-.\.venv-build\Scripts\python.exe -m build --no-isolation packages/docuworks-ctypes --outdir dist
-.\.venv-build\Scripts\python.exe -m build --no-isolation packages/docuworks-integrations --outdir dist
-.\.venv-build\Scripts\python.exe -m twine check dist/*
-```
-
-ビルド環境やZIP時刻により再ビルドwheelのファイルハッシュは変わり得ます。公開用Portableには検証済みの同一wheelを採用し、対応はRELEASE_PROVENANCE.jsonに記録します。ソースのpackage本文と採用wheel内部はファイル単位で照合しています。

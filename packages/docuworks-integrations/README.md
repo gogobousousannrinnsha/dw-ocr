@@ -1,4 +1,18 @@
-# docuworks-integrations 0.6.0
+# docuworks-integrations 0.7.0
+
+同じページの領域IDを複数指定する確認用XDWに対応しました。
+[複数領域APIと検証範囲](../../docs/REVIEW_XDW_REGIONS_0.7.0.md)。複数領域はSDK往復に加え、同じ文字を持つ2領域の片方だけをViewer編集・別名保存後に取り込む正常1ケースを検証済みです。
+Viewerの操作・再表示は利用者報告、保存ファイルの照合とJSONL反映はコード検証です。複数領域のViewer異常操作は未確認です。
+
+1ページ・1領域の確認用XDWの生成と訂正候補の読取りを追加しました。
+[API仕様](../../docs/REVIEW_XDW_0.7.0.md) ／ [SDK・Viewer検証記録](../../docs/REVIEW_XDW_VERIFICATION.md)。
+形式1.0の1ページ・1領域の原本重ね合わせ型についても、SDK往復とViewer編集・別名保存後の取り込みを検証済みです。白紙型は対象外です。
+
+Pythonから保存済みOCR文字を別JSONで訂正し、元bundleを保ったまま修正後JSONLを生成できます。
+使用例・保存形式・例外は [文字訂正基盤](../../docs/CORRECTIONS_0.7.0.md) を参照してください。
+Core、既存CLI、Portableの動作は維持しています。
+
+## 0.6.0 統合機能
 
 保存結果を使うannotate-rectanglesとrender-text-maps、複数入力をまとめるprocess-documentsを追加しました。矩形は塗りなし・1ptで保存と再オープンを検証します。OCR bundleは保持し、派生成果物は別ディレクトリへ保存します。各CLIの--helpで引数を確認できます。
 

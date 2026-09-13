@@ -1,7 +1,6 @@
 {
   "schema_version": 1,
-  "release": "v0.2.0",
-  "distribution_date": "2026-09-12",
+  "release": "v0.3.0",
   "assets": [
     {
       "name": "docuworks_ctypes-1.0.0-py3-none-any.whl",
@@ -14,19 +13,19 @@
       "sha256": "af434c6918f64edd7a338c6985b2c29f0c7c68adb31fbbbcf1882f65697bcdec"
     },
     {
-      "name": "docuworks_integrations-0.6.0-py3-none-any.whl",
-      "bytes": 51520,
-      "sha256": "0977f701e893735d8669b3404923d0f59c3ee677ec6b0e4d4fff79abb3eaa340"
+      "name": "docuworks_integrations-0.7.0-py3-none-any.whl",
+      "bytes": 62965,
+      "sha256": "aad9447b990b4dd329e94b45866ff1c9f063c79e0c2e11e523943c947159a985"
     },
     {
-      "name": "docuworks_integrations-0.6.0.tar.gz",
-      "bytes": 54912,
-      "sha256": "4501e0971d40ea4163e462ebbd8bede33fe3946c41f0a003ac7eff361e179a3d"
+      "name": "docuworks_integrations-0.7.0.tar.gz",
+      "bytes": 77469,
+      "sha256": "e66a060f0fe8860a11d1e2fbf4e216c35cd1a9989e78351321d76df099c1d283"
     },
     {
-      "name": "dw-ocr-source-v0.2.0.zip",
-      "bytes": 261879,
-      "sha256": "5799e2a2a412f04eb4d19bbd3af935cb3eeabbf7c3704b67687471228dc18259"
+      "name": "dw-ocr-source-v0.3.0.zip",
+      "bytes": 522951,
+      "sha256": "238529c41b0874e7a56fc0b8c5a4f7a2ffbacaa1a86b5481d721e1f278bcb9d3"
     },
     {
       "name": "MODEL_HASHES.json",
@@ -36,67 +35,67 @@
     {
       "name": "ocr_join_tools.zip",
       "bytes": 5050,
-      "sha256": "f5e9e0b47bc046f5bea7bc3710f734f4edf2bdb5252e143be2577c7be16055dd"
+      "sha256": "ad826f4efc81af651ca5c5507149d255c3d04385f597388516aaef36e1df2d09"
     },
     {
       "name": "ocr_part_001_transport.zip",
       "bytes": 419426450,
-      "sha256": "b6368c3ef3cc87747ba92f553da0b8fb649f2f2c06ddf686a78989057168373b"
+      "sha256": "dd5d70b1517e736f798ba526a8819c0cfbb9119b4cec5a837963c76e771a5caa"
     },
     {
       "name": "ocr_part_002_transport.zip",
       "bytes": 419426450,
-      "sha256": "71f782cfdfa40b9e5ed024b73875ac29f5f1c26c11c46aa77d7d2990d6c0dcc6"
+      "sha256": "adce26a16c817127bbc1d82cd3b9020b0bee3938c80c574c9ce2085860900dcc"
     },
     {
       "name": "ocr_part_003_transport.zip",
       "bytes": 419426450,
-      "sha256": "aac0f58c03467358f872d33cea61a66bf8009edaf73a919584684f94bfeeab08"
+      "sha256": "e0935a80a8d81a2271c94ba0de90284c7109092858c4e4b60c735daafdb93adf"
     },
     {
       "name": "ocr_part_004_transport.zip",
       "bytes": 419426450,
-      "sha256": "7159d6626a83f7bea37ce2bd1589fc06521cf4ff6b5ba06f598e939da2bae19a"
+      "sha256": "ad7da6390b03a88e0703c801b61fb3930b61b7797dabe97c8ee29fe3b9a866c4"
     },
     {
       "name": "ocr_part_005_transport.zip",
       "bytes": 419426450,
-      "sha256": "0d0002a235c0c81cd888c9cb59c943c325714b3b4be75d600ead2f934a02b432"
+      "sha256": "d41ef92a8213ec753d04e137a9723792a44e6c28d79171f35dfbbd3c0780e2c4"
     },
     {
       "name": "ocr_part_006_transport.zip",
       "bytes": 419426450,
-      "sha256": "1ee0e67cae746d2c6da74daabef4fa6f91a97b6465fbf080aa84ac706f134aca"
+      "sha256": "f9b7e8be4779ac95f3724ea48f83ad1549df233a9fb057236c3287b8bc130ef0"
     },
     {
       "name": "ocr_part_007_transport.zip",
       "bytes": 419426450,
-      "sha256": "81ff9fb900ebaebcf0daa64a70b6d66273377a665337c955e5a398566c907d93"
+      "sha256": "85fedcfe50c07b8d47a062ec140735d287fe686b04741eaea8e81bfaecf1d2cd"
     },
     {
       "name": "ocr_part_008_transport.zip",
-      "bytes": 287590635,
-      "sha256": "916d8c950f8740e64ca5f51b98b8c9c1650bd4e462ab21dfa25fdb47375ce12a"
+      "bytes": 287839871,
+      "sha256": "07c1a9cbf282cea905fc7216fbfc3780b0f549d4ebba3fa9158ad36ea55fa000"
     },
     {
-      "name": "RELEASE_NOTES_v0.2.0.md",
-      "bytes": 2753,
-      "sha256": "a0a7a0b163fa66b33357bb0f356fbf97ac0e807422ebd5f7e684155005bef4b2"
+      "name": "RELEASE_NOTES_v0.3.0.md",
+      "bytes": 1700,
+      "sha256": "ab6660d543cf26733dcadf637a9601616862d5d13ea5d91428e240f199b89abd"
     },
     {
       "name": "RELEASE_PROVENANCE.json",
-      "bytes": 1900,
-      "sha256": "0464d6bcfc3280e1983f8279df2f463a8377d8db754025876646efa644e2cab6"
+      "bytes": 1861,
+      "sha256": "a552eb4714d850be3bc79d8074868db55061e9955333b4f48835ded256a74488"
     },
     {
       "name": "SHA256SUMS_RESTORED.txt",
       "bytes": 87,
-      "sha256": "89ef33409639ee91309c2ca72a47a3bcad7a63d18fdf019d34cdcab798aab224"
+      "sha256": "654ef305a3d7d95d80d5314f9426a38ee234c6a1e98cc127bbe2efe8c64ed3a9"
     },
     {
       "name": "split_manifest.json",
       "bytes": 1716,
-      "sha256": "c8a2c0faf7a315e29d6876b99f129746d6c3f0778909d7feec2f10a802713b35"
+      "sha256": "d34191d1bdfb52fe196e36449672e3cc65ae5997ad3685fb618888be8ea2cc7a"
     },
     {
       "name": "third-party-sources-v0.1.0.zip",
@@ -105,14 +104,14 @@
     },
     {
       "name": "VERIFICATION_JA.md",
-      "bytes": 4557,
-      "sha256": "13846dbe709232a83a8d0f04ef275d648797cf867c309acd7de87bc025ef7c01"
+      "bytes": 4646,
+      "sha256": "b9a60d8095659b00de8f8fa3d0f3911d4c65a5a4ce702c416a13a6d9ac0e6a44"
     }
   ],
   "restored_zip": {
     "name": "dw_ocr_with_code.zip",
-    "bytes": 3223574617,
-    "sha256": "551c190d18bc323c499bfec4b3e21e735891588743384e322733fc639fda577d"
+    "bytes": 3223823853,
+    "sha256": "3a26d3c3d5c45f370e2a6a38e93b472a773a7880566aec7d0943c11ca83d61d6"
   },
   "hash_exclusions": [
     "release-assets.json",

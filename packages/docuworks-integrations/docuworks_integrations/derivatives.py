@@ -5,6 +5,7 @@ import os
 import shutil
 
 from .results import load_ocr_result, bundle_path, sha256, write_json
+from . import __version__
 from ._storage import owned_directory, publish_new, cleanup_owned
 
 COLORS = {'red': 0x0000ff, 'blue': 0xff0000, 'green': 0x008000,
@@ -34,7 +35,7 @@ def recheck(result):
 
 def reference(result):
     return dict(run_id=result.run_id, manifest_sha256=result.manifest_sha256,
-                integration_version='0.6.0')
+                integration_version=__version__)
 
 
 def rectangle_settings(padding_mm, min_confidence, color, minimum_mm=3.0):

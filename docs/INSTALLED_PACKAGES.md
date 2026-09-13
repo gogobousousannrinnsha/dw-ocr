@@ -24,7 +24,7 @@
 | crc32c | 2.9 | LGPL-2.1-or-later |
 | cryptography | 50.0.1 | Apache-2.0 OR BSD-3-Clause |
 | docuworks-ctypes | 1.0.0 | MIT |
-| docuworks-integrations | 0.6.0 | MIT |
+| docuworks-integrations | 0.7.0 | MIT |
 | filelock | 3.32.5 | MIT |
 | frozenlist | 1.8.0 | Apache-2.0 |
 | fsspec | 2026.7.0 | BSD-3-Clause |

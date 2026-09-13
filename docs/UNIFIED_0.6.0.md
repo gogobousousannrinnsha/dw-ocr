@@ -1,4 +1,4 @@
-# Integrations 0.6.0 / DW-OCR v0.2.0 Pre-release
+# Integrations 0.6.0 / DW-OCR v0.2.0 公開候補
 
 開発の正本から公開用ソースを生成し、そのソースから作った同一wheelを開発検証とPortableに使用します。Core 1.0.0の機能コード、Result 1.0/1.1、旧run移行、Marker契約は維持します。マーカーの13pt上限問題は別課題です。
 

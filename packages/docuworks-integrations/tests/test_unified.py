@@ -5,6 +5,7 @@ import sys
 import pytest
 
 from docuworks_integrations import derivatives as d
+from docuworks_integrations import __version__
 from docuworks_integrations.settings import Settings, load_settings
 from docuworks_integrations.discovery import collect_documents
 from docuworks_integrations.results import sha256, load_ocr_result
@@ -46,6 +47,7 @@ def test_rectangle_geometry_and_saved_only(fake,tmp_path):
     ocr_xdw_pages(fake,tmp_path/'run',tmp_path,engine=Engine())
     fake.unlink() # consumer uses the verified source in the bundle
     report=d.annotate_rectangles(tmp_path/'run',tmp_path/'out.xdw',dry_run=True)
+    assert report['integration_version']==__version__
     assert [i['page'] for i in report['regions']]==[1,3]
     assert report['settings']['border_width_pt']==1
     assert report['regions'][1]['ocr_bbox_mm']['width']==42
@@ -81,6 +83,7 @@ def test_maps_no_ocr_and_immutable(fake,tmp_path,monkeypatch):
     try: font=d.resolve_font()
     except FileNotFoundError: pytest.skip('Japanese font unavailable on this host')
     report=d.render_text_maps(tmp_path/'run',tmp_path/'maps',font=font)
+    assert report['integration_version']==__version__
     assert len(report['pages'])==3 and report['pages'][1]['region_ids']==[]
     for image in (tmp_path/'maps').rglob('*.png'):
         with PIL.open(image) as im: assert im.size==(1000,1000)
@@ -103,6 +106,8 @@ def test_workflow_shared_engine_and_failures(fake,tmp_path,monkeypatch):
     job=jobs.process_documents([root,root/'a.xdw'],tmp_path/'out',tmp_path/'runs',tmp_path,
                                 engine=engine,settings=Settings(jsonl=True))
     assert job['exit_code']==0 and len(job['documents'])==2
+    assert job['integration_version']==__version__
+    assert json.loads((tmp_path/'out/job.json').read_text(encoding='utf-8'))['integration_version']==__version__
     assert engine.calls==[1,2,3,1,2,3]
     assert all(r['jsonl']=='SUCCEEDED' for r in job['documents'])
     assert not Path(job['documents'][0]['run_dir']).is_absolute()
@@ -118,6 +123,7 @@ def test_no_input(tmp_path):
     root=tmp_path/'empty'; root.mkdir()
     job=process_documents([root],tmp_path/'out',tmp_path/'runs',tmp_path)
     assert job['status']=='NO_INPUT' and job['exit_code']==0
+    assert job['integration_version']==__version__
 
 
 def test_publication_permission_failure_precedes_ocr(fake,tmp_path,monkeypatch):

@@ -1,8 +1,11 @@
 """Lightweight public API; optional backends are loaded only on use."""
 from importlib import import_module
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 _EXPORTS = {
+    **dict.fromkeys(("create_review_xdw", "read_review_edit"), "review_xdw"),
+    **dict.fromkeys(("create_review_xdw_regions", "read_review_edits", "ReviewEditsCandidate"), "review_xdw"),
+    **dict.fromkeys(("TextCorrection", "CorrectionSet", "EffectiveOcrRegion", "EffectiveOcrPage", "EffectiveOcrResult", "save_corrections", "load_corrections", "apply_corrections", "export_effective_jsonl"), "corrections"),
     **dict.fromkeys(("annotate_rectangles", "render_text_maps"), "derivatives"),
     "process_documents": "jobs",
     **dict.fromkeys(("ocr_folder", "OcrBatchResult", "BatchDocumentResult"), "batch"),
