@@ -42,7 +42,7 @@ python -m docuworks_integrations mark-region --run-dir local-data/batch-001/runs
 
 GPUエンジンは1インスタンスを共有し、文書・ページを逐次処理します。文書ハンドルは文書ごとに閉じます。
 
-文書の消失・アクセス拒否・原本変更、SDKのBAD_FORMAT、NEWFORMAT、FILE_NOT_FOUND、ACCESSDENIED、SHARING_VIOLATION、INVALID_ACCESS、PROTECT_MODULE、SIGNATURE_MODULEは文書固有エラーとして記録し次へ進みます。後者のSDKエラーは文書を開く／画像化する段階に限定します。失敗文書は完成runを公開せず、取得できた途中データはerror.jsonのdiagnostics相対参照が指す一時領域、原因はerror.jsonへ残します。文書を開く前の失敗はbatch.jsonだけに記録される場合があります。
+文書の消失・アクセス拒否・原本変更、SDKのBAD_FORMAT、NEWFORMAT、FILE_NOT_FOUND、ACCESSDENIED、SHARING_VIOLATION、INVALID_ACCESS、PROTECT_MODULE、SIGNATURE_MODULEは文書固有エラーとして記録し次へ進みます。後者のSDKエラーは文書を開く／画像化する段階に限定します。失敗文書は完成runを公開せず、取得できた途中データはdiagnostics以下、原因はerror.jsonへ残します。文書を開く前の失敗はbatch.jsonだけに記録される場合があります。
 
 推論・モデル・GPU・DLL利用不能、ディスク書込み障害、未知の内部例外、文書を閉じられない場合は全体を停止します。CPU切替や再試行はしません。完成済みrunを保持し、未着手はPENDINGで残します。batch.jsonは文書開始・終了ごとに一時ファイルから置換します。記録保存自体が失敗した場合は処理を止め、書き残されたRUNNINGを成功とは扱いません。Ctrl+CはINTERRUPTEDです。プロセス強制終了・電源断からの復旧／再開は今回対象外です。
 

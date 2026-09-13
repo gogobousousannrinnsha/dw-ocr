@@ -1,39 +1,34 @@
-# DW-OCR Portable v0.2.0
+# DW-OCR Portable v0.3.0
 
-Windows x64向けの、Python・OCRライブラリ・PP-OCRv6 mediumモデルを含む実行環境です。**v0.2.0はPre-release（試験的リリース）**です。Core 1.0.0 / Integrations 0.6.0を使用します。
+**Pre-release / 試験的リリース**。Core 1.0.0 / Integrations 0.7.0 / Python 3.13.15。
 
-## ダウンロードと最初の実行
+[v0.3.0の配布](https://github.com/gogobousousannrinnsha/dw-ocr/releases/tag/v0.3.0)から、結合ツールと全8個のtransport ZIPを同じ空フォルダーへ取得します。
+結合ツールを展開してjoin_parts.batを実行し、復元したZIPを新規フォルダーへ展開してください。旧版と既存データは残してください。
+INPUTにXDWのコピーを入れ、既存のOCR開始.batを実行します。複数ファイル・フォルダーのドロップにも対応します。
 
-[v0.2.0 Release](https://github.com/gogobousousannrinnsha/dw-ocr/releases/tag/v0.2.0)から、`ocr_join_tools.zip`と`ocr_part_001_transport.zip`～`ocr_part_008_transport.zip`の全9ファイルを、旧版と別の空フォルダーへ取得します。
+## 0.7.0で追加した機能
 
-1. 結合ツールZIPだけを展開し、中のBAT・PowerShell・manifestを8個のtransport ZIPと同じ階層へ置きます。
-2. `join_parts.bat`を実行し、成功表示を確認します。transport ZIPは個別に展開する必要はありません。
-3. 復元された`dw_ocr_with_code.zip`を、新しい書込み可能な短いフォルダーへ展開します。
-4. `verify_environment.bat`で環境を確認します。
-5. 試験用XDWのコピーを`INPUT`へ置き、`OCR開始.bat`を実行します。XDW・フォルダーの複数ドロップにも対応します。
+保存済みOCRの文字を別JSONへ訂正保存し、元runを保ったまま訂正後JSONLを出力できます。
+同じページの指定領域を原本重ね合わせ型の確認用XDWへ出し、編集・別保存した文字を領域IDに対応付けて取り込めます。
+同じ文字の領域同士を、文字列や表示位置で推測して対応付けることはありません。
 
-GitHubの「Source code」ZIPと`dw-ocr-source-v0.2.0.zip`はソースです。Python・GPUライブラリ・モデルを含むPortableとは異なります。分割ファイルと結合ツールは同じReleaseのものだけを組み合わせてください。
+**訂正・確認用XDWはPython APIです。通常のOCR開始操作へ自動組込みする機能ではありません。**
+既存の矩形・確認画像・元結果JSONLの動作は維持します。訂正後のJSONLにはexport_effective_jsonlを使用します。
 
-## 機能
+- [0.7.0の機能・検証](docs/RELEASE_0.7.0.md)
+- [文字訂正API](docs/CORRECTIONS_0.7.0.md) / [使用例](examples/correct_saved_ocr.py)
+- [1領域レビュー](docs/REVIEW_XDW_0.7.0.md) / [複数領域レビュー](docs/REVIEW_XDW_REGIONS_0.7.0.md)
+- [複数領域の使用例](examples/use_review_xdw_regions.py)
+- [移行手順](docs/MIGRATION_v0.3.0.md) / [検証条件](docs/VERIFICATION_v0.3.0.md)
+- [既存OCR操作](docs/UNIFIED_0.6.0.md)
 
-- 文書単位で全ページをOCRし、認識領域の矩形付きXDWと確認画像を作成します。原本は変更しません。
-- `settings.ini`で再帰探索、300/600dpi、信頼度、矩形色・余白、日本語フォント、JSONL出力を設定できます。
-- 結果は`OUTPUT/job-.../doc-.../`、再利用できるOCR結果は`runs/job-.../doc-.../`に保存します。
-- 保存runから矩形・確認画像・JSONLを再生成できます。文字や色の確認のたびにOCRをやり直す必要はありません。
-- 旧入口と旧runの利用を継続できます。新しい出力先を使い、run内部は直接編集しません。
+白紙型、複数ページ確認XDW、検索、テンプレート、再OCR、領域の追加・削除・分割・結合は未対応です。
+Viewerの1領域6ケース・複数領域の正常1ケースの利用者確認を継承し、今回の配布環境でも保存済み文書を再取り込みします。
+複数領域のViewer異常操作は未確認です。既知のMarker 13pt編集問題は別の未解決課題です。
 
-既定は300dpi、INPUT直下のみ、赤い矩形、JSONLなしです。停止後にアプリ全体をまとめて移動できます。
+Windows x64、対応DocuWorks・x64 XDWAPI、NVIDIA GPUと対応ドライバーが必要です。CPU自動切替はありません。
+同梱のモデル・第三者実行環境はv0.2.0の組合せを維持しています。
 
-## 必要環境と説明書
-
-Windows x64、正規のDocuWorks製品と対応x64 XDWAPI、CUDA対応NVIDIA GPU・ドライバー、日本語フォントが必要です。Pythonは同梱されます。15～20GB以上の空き容量に、OCR成果物の保存分を追加してください。GPU OCRにCPUへの自動切替はありません。
-
-[復元・実行](docs/INSTALL_RESTORE.md) / [設定・API](docs/UNIFIED_0.6.0.md) / [移行](docs/MIGRATION_v0.2.0.md) / [ソース導入・ビルド](docs/SETUP.md) / [配布一覧](docs/DISTRIBUTION_FILES.md) / [検証](docs/VERIFICATION.md) / [制約](docs/KNOWN_LIMITATIONS.md)
-
-確認画像は組版の再現や校正結果ではありません。XDWの検索用OCRテキスト層を埋め込む機能ではありません。認識文字・矩形位置は利用者が確認してください。
-
-## ライセンス
-
-独自部分は[MIT](LICENSE)、第三者資産はそれぞれの条件です。[適用範囲](LICENSE_NOTICE.md) / [第三者資産・対応ソース](THIRD_PARTY_NOTICES.md)。DocuWorks製品・SDK・DLL、GPUドライバー、Windowsフォントは同梱しません。本ツールは非公式で、現状有姿で提供します。
-
-[Issues](https://github.com/gogobousousannrinnsha/dw-ocr/issues)には、版と匿名化した再現手順を記載してください。実文書・OCR本文・個人パス・資格情報は掲載しないでください。
+独自部分はMIT、第三者資産は各条件です。[適用範囲](LICENSE_NOTICE.md) / [第三者表示と対応ソース](THIRD_PARTY_NOTICES.md)。
+DocuWorks製品・SDK・DLL、GPUドライバー、Windowsフォント、実文書、OCR本文、個人設定は同梱しません。
+報告には匿名化した再現手順を使い、実文書・OCR本文・個人パス・資格情報を掲載しないでください。

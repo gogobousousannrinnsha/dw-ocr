@@ -1,1 +1,2 @@
-* -text
+# Preserve imported release bytes and source-manifest hashes across checkouts.
+* -text whitespace=cr-at-eol

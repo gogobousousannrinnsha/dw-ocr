@@ -1,0 +1,177 @@
+name: DLL-free tests and publication audit
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  corrections-python310:
+    name: Correction and review logic (Python 3.10)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install test dependencies
+        run: |
+          python -m pip install -r requirements/dev.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Test correction API without native dependencies
+        shell: powershell
+        run: |
+          $env:PYTHONPATH = "$PWD/packages/docuworks-integrations;$PWD/packages/docuworks-ctypes"
+          $env:DOCUWORKS_INTEGRATIONS_TEST_TMP = Join-Path $env:RUNNER_TEMP 'corrections-tests'
+          python -m pytest packages/docuworks-integrations/tests/test_corrections.py packages/docuworks-integrations/tests/test_review_xdw.py packages/docuworks-integrations/tests/test_review_xdw_regions.py -p no:cacheprovider
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+  dll-free-tests:
+    name: DLL-free tests (Python ${{ matrix.python-version }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: |
+            requirements/dev.txt
+            requirements/results.txt
+
+      - name: Install DLL-free test environment
+        run: |
+          python -m pip install --upgrade pip
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip install -r requirements/dev.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip install -r requirements/results.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Prepare temporary test directory
+        shell: powershell
+        run: |
+          $testTmp = Join-Path $env:RUNNER_TEMP 'docuworks-integration-tests'
+          New-Item -ItemType Directory -Force -Path $testTmp | Out-Null
+          "DOCUWORKS_INTEGRATIONS_TEST_TMP=$testTmp" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Test docuworks-integrations without DocuWorks DLL
+        run: >-
+          python -m pytest packages/docuworks-integrations/tests
+          --ignore=packages/docuworks-integrations/tests/integration
+          -p no:cacheprovider
+
+      - name: Test docuworks-ctypes without DocuWorks DLL
+        working-directory: packages/docuworks-ctypes
+        run: >-
+          python -m pytest tests
+          --ignore=tests/integration
+          -k "not installed_bundle_allows_companion_patch_difference"
+          -p no:cacheprovider
+
+  publication-audit:
+    name: Publication audit
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements/dev.txt
+
+      - name: Install audit and build tools
+        run: |
+          python -m pip install --upgrade pip
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip install -r requirements/dev.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip install build twine
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Test publication guards
+        run: python -m pytest scripts/tests -p no:cacheprovider
+
+      - name: Audit source publication set
+        run: python scripts/audit_publication.py
+
+      - name: Build both packages
+        run: |
+          python -m build packages/docuworks-ctypes --outdir dist
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m build packages/docuworks-integrations --outdir dist
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Check package metadata and README rendering
+        shell: powershell
+        run: |
+          $files = Get-ChildItem dist -File | ForEach-Object { $_.FullName }
+          python -m twine check $files
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Audit wheel and sdist contents
+        run: python scripts/audit_distributions.py dist
+
+      - name: Smoke-test built wheels from outside repository
+        shell: powershell
+        run: |
+          $smokeDir = Join-Path $env:RUNNER_TEMP 'docuworks-wheel-smoke'
+          $outsideDir = Join-Path $env:RUNNER_TEMP 'outside-repository'
+          python -m venv $smokeDir
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $smokePython = Join-Path $smokeDir 'Scripts\python.exe'
+          & $smokePython -m pip install --upgrade pip
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & $smokePython -m pip install --no-index --find-links dist docuworks-ctypes docuworks-integrations
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & $smokePython -m pip check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory -Force -Path $outsideDir | Out-Null
+          Push-Location $outsideDir
+          try {
+            & $smokePython -c "import docuworks_ctypes, docuworks_integrations; print('wheel imports ok')"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            & $smokePython -m docuworks_integrations --help
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          finally {
+            Pop-Location
+          }
+
+      - name: Verify unmodified Integrations sdist
+        shell: powershell
+        run: |
+          $archives = @(Get-ChildItem dist/docuworks_integrations-*.tar.gz)
+          if ($archives.Count -ne 1) { throw 'Expected exactly one Integrations sdist' }
+          $archive = $archives[0]
+          python -m pip install --no-index --find-links dist docuworks-ctypes
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/verify_sdist.py $archive.FullName (Join-Path $env:RUNNER_TEMP 'sdist-repro')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload audited distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: audited-python-distributions
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14

@@ -8,6 +8,7 @@ import time
 import uuid
 
 from .settings import Settings
+from . import __version__
 from .discovery import collect_documents, check_source
 from .derivatives import annotate_rectangles, render_text_maps, resolve_font, IntegrityError
 from .results import load_ocr_result, export_jsonl, sha256
@@ -43,7 +44,7 @@ def process_documents(inputs, output_dir, runs_dir, model_root, *, settings=None
         source_diagnostic_path=str(p),run_dir=Path(os.path.relpath(runs/f'doc-{i:06d}',output)).as_posix(),
         output_dir=f'doc-{i:06d}',ocr='PENDING',rectangles='PENDING',text_maps='PENDING',
         jsonl='PENDING' if settings.jsonl else 'DISABLED',errors=[]) for i,p in enumerate(sources,1)]
-    job = dict(schema='dw-ocr-job',schema_version='1.0',integration_version='0.6.0',
+    job = dict(schema='dw-ocr-job',schema_version='1.0',integration_version=__version__,
         job_id=str(uuid.uuid4()),status='RUNNING',started_at=datetime.now(timezone.utc).isoformat(),
         settings=settings.to_dict(),documents=records,exit_code=1)
     _journal(output,job)
