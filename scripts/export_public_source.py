@@ -6,6 +6,7 @@ from pathlib import Path
 import shutil
 import re
 import xml.etree.ElementTree as ET
+from distribution_layout import load_layout, render_readme
 
 
 def export(repo, baseline_public, output, *, release_version='v0.3.0'):
@@ -17,6 +18,7 @@ def export(repo, baseline_public, output, *, release_version='v0.3.0'):
     runtime=(repo/'packages/docuworks-integrations/docuworks_integrations/__init__.py').read_text(encoding='utf-8')
     if f'__version__ = "{version}"' not in runtime or not re.fullmatch(r'\d+\.\d+\.\d+',version):
         raise ValueError('stable package and runtime versions must match')
+    load_layout(repo/"portable")
     if output.exists(): raise FileExistsError(output)
     output.mkdir(parents=True)
     for name in ('LICENSE','LICENSE_NOTICE.md','THIRD_PARTY_NOTICES.md'):
@@ -32,15 +34,15 @@ def export(repo, baseline_public, output, *, release_version='v0.3.0'):
         metadata.write_text(text,encoding='utf-8')
         shutil.copyfile(baseline_public/'LICENSE',destination/'LICENSE')
     for folder in ('portable','requirements','docs','examples','scripts'):
-        if folder=='docs' and (baseline_public/folder).is_dir():
-            shutil.copytree(baseline_public/folder,output/folder)
         shutil.copytree(repo/folder,output/folder,dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__','*.pyc'))
-    # Preserve already published compatibility entry points; do not regenerate their shell syntax.
-    for name in ('ocr_rectangles.bat','text_maps.bat'):
-        shutil.copyfile(baseline_public/'portable'/name,output/'portable'/name)
+    if (repo/'.github').is_dir():
+        shutil.copytree(repo/'.github',output/'.github')
+    for name in ('.gitattributes','.gitignore'):
+        if (repo/name).is_file():
+            shutil.copyfile(repo/name,output/name)
     # Historical development records stay recognizable as redacted records;
     # operational clone instructions point to the public repository instead.
-    for path in (output/'docs').rglob('*'):
+    for path in [*(output/'docs').rglob('*'), *(output/'packages').rglob('*.md')]:
         if path.is_file() and path.suffix=='.xml':
             tree=ET.parse(path)
             for element in tree.iter():
@@ -51,20 +53,24 @@ def export(repo, baseline_public, output, *, release_version='v0.3.0'):
         if path.name=='INSTALLED_PACKAGES.md':
             text=re.sub(r'\| docuworks-integrations \| [^|]+ \|',f'| docuworks-integrations | {version} |',text)
         pattern=r'https://github\.com/[A-Za-z0-9_-]+/docuworks-ocr(?:\.git)?'
-        if path.name=='SIMPLE_GUIDE.md':
-            text=re.sub(pattern,'https://github.com/gogobousousannrinnsha/dw-ocr.git',text)
-        else:
-            text=re.sub(pattern,'REDACTED_PRIVATE_REPOSITORY',text)
-            text=re.sub(r'`[A-Za-z0-9_-]+/docuworks-ocr`','`REDACTED_PRIVATE_REPOSITORY`',text)
+        public='https://github.com/gogobousousannrinnsha/dw-ocr'
+        text=re.sub(pattern+r'/blob/main/',public+'/blob/'+release_version+'/',text)
+        text=re.sub(pattern,public,text)
+        text=text.replace('cd docuworks-ocr', 'cd dw-ocr')
+        text=re.sub(r'`[A-Za-z0-9_-]+/docuworks-ocr`','`gogobousousannrinnsha/dw-ocr`',text)
+        if path.suffix=='.json':
+            def portable_evidence(value):
+                if isinstance(value,dict): return {k:portable_evidence(v) for k,v in value.items()}
+                if isinstance(value,list): return [portable_evidence(v) for v in value]
+                if isinstance(value,str) and re.match(r'^[A-Za-z]:[\\/]',value):
+                    return 'REDACTED_LOCAL_PATH'
+                if isinstance(value,str) and re.search(pattern,value):
+                    return 'REDACTED_PRIVATE_REPOSITORY'
+                return value
+            text=json.dumps(portable_evidence(json.loads(path.read_text(encoding='utf-8'))),ensure_ascii=False,indent=2)+'\n'
         path.write_text(text,encoding='utf-8')
-    (output/'README.md').write_text(f'# DW-OCR {release_version}\n\n'
-        f'Integrations {version} / Core 1.0.0。Pre-release。\n\n'
-        '[利用・移行・API手順](docs/UNIFIED_0.6.0.md)\n\n'
-        '[文字訂正](docs/CORRECTIONS_0.7.0.md) / '
-        '[確認用XDW](docs/REVIEW_XDW_REGIONS_0.7.0.md)\n\n'
-        '通常のOCR入口は従来どおりです。訂正・確認用XDWはPython APIとして提供します。\n\n'
-        'ソースのビルド: `python -m build packages/docuworks-integrations`\n'
-        'Coreも同様にpackages/docuworks-ctypesからビルドします。\n',encoding='utf-8')
+    (output/'README.md').write_text(render_readme(repo/'portable', 'public_readme',
+        {'docuworks-ctypes': '1.0.0', 'docuworks-integrations': version}, release_version), encoding='utf-8')
     # Public requirements must refer to this export's local packages, never a private URL.
     files=[]
     for path in sorted(output.rglob('*')):

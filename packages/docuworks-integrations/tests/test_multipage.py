@@ -6,7 +6,7 @@ from docuworks_integrations.results import load_ocr_result, save_ocr_result, get
 from docuworks_integrations.page_selection import parse_pages, resolve_pages
 from docuworks_integrations.recognition import ocr_xdw_pages, ocr_xdw
 import docuworks_integrations.recognition as recognition
-import docuworks_integrations.workflow as workflow
+import docuworks_integrations._preview as preview_module
 
 
 @pytest.mark.parametrize('text',['','0','-1','3-1','1,,2','x','1-','100001'])
@@ -58,7 +58,7 @@ def fake(monkeypatch,tmp_path):
     def preview(image,regions,folder):
         (folder/'preview.png').write_bytes(b'preview')
         (folder/'regions.md').write_text('list',encoding='utf-8')
-    monkeypatch.setattr(workflow,'create_preview',preview)
+    monkeypatch.setattr(preview_module,'create_preview',preview)
     source=tmp_path/'source.xdw'; source.write_bytes(b'original')
     return source
 

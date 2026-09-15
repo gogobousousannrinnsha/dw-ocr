@@ -1,8 +1,9 @@
 """Lightweight public API; optional backends are loaded only on use."""
 from importlib import import_module
 
-__version__ = "0.7.0"
+__version__ = "0.8.0"
 _EXPORTS = {
+    **dict.fromkeys(("ReviewSession", "ReviewedResult", "create_review_session", "load_review_session", "import_reviewed_result", "load_reviewed_result", "export_reviewed_jsonl"), "reviewed"),
     **dict.fromkeys(("create_review_xdw", "read_review_edit"), "review_xdw"),
     **dict.fromkeys(("create_review_xdw_regions", "read_review_edits", "ReviewEditsCandidate"), "review_xdw"),
     **dict.fromkeys(("TextCorrection", "CorrectionSet", "EffectiveOcrRegion", "EffectiveOcrPage", "EffectiveOcrResult", "save_corrections", "load_corrections", "apply_corrections", "export_effective_jsonl"), "corrections"),

@@ -25,13 +25,13 @@ def test_ocr_uses_rec_polys_and_preserves_text():
     assert len(regions[0].polygon) == 4
 
 
-@pytest.mark.parametrize("change", ["length", "nan", "outside", "empty", "area"])
+@pytest.mark.parametrize("change", ["length", "nan", "outside", "nonstring", "area"])
 def test_ocr_invalid_output_rejected(change):
     data = result()
     if change == "length": data["rec_scores"].pop()
     if change == "nan": data["rec_scores"][0] = float("nan")
     if change == "outside": data["rec_polys"][0][0][0] = -1
-    if change == "empty": data["rec_texts"][0] = ""
+    if change == "nonstring": data["rec_texts"][0] = None
     if change == "area": data["rec_polys"][0] = [[10, 10]] * 4
     with pytest.raises(ValueError): parse_paddle_result(data, 100, 100)
 

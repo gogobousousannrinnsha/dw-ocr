@@ -52,7 +52,7 @@ def ocr_xdw_pages(input_xdw, run_dir, model_root, *, pages=None, dpi=300, dll_pa
             if engine is None:
                 from .paddle import PaddleOcrEngine
                 engine = PaddleOcrEngine(model_root)
-            from .workflow import create_preview
+            from ._preview import create_preview
             for index, n in enumerate(selected, 1):
                 current_page, phase = n, 'render'
                 page_started = time.perf_counter()

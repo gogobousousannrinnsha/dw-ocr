@@ -2,6 +2,8 @@
 from pathlib import Path
 import sys
 import zipfile
+import shutil
+import json
 
 import pytest
 
@@ -31,6 +33,9 @@ def setup_case(root):
             z.writestr(f'{module}-{version}.dist-info/METADATA',f'Name: {package}\nVersion: {version}\n')
     for name in ('portable','requirements','docs','examples','scripts'):
         (repo/name).mkdir()
+    shutil.copytree(Path(__file__).resolve().parents[2]/'portable',repo/'portable',dirs_exist_ok=True)
+    (repo/'portable/ocr_rectangles.bat').write_bytes(bat)
+    (repo/'portable/text_maps.bat').write_bytes(bat)
     (repo/'docs/CORRECTIONS_0.7.0.md').write_text('correction API',encoding='utf-8')
     (repo/'examples/use_review_xdw_regions.py').write_text('# multi region example',encoding='utf-8')
     baseline=root/'baseline.zip'
@@ -53,12 +58,13 @@ def test_public_export_includes_docs_examples_and_preserves_bat(tmp_path):
     export(repo,public,target)
     assert (target/'docs/CORRECTIONS_0.7.0.md').read_text()=='correction API'
     assert (target/'examples/use_review_xdw_regions.py').exists()
-    assert (target/'docs/INSTALLED_PACKAGES.md').read_text()=='published inventory\n| docuworks-integrations | 0.7.0 | MIT |'
+    assert not (target/'docs/INSTALLED_PACKAGES.md').exists()
     assert 'REDACTED_PRIVATE_REPOSITORY' in (target/'docs/history.json').read_text()
     assert 'private-owner' in (repo/'docs/history.json').read_text()
     assert 'private-' not in (target/'docs/tests.xml').read_text()
     assert 'tests="1"' in (target/'docs/tests.xml').read_text()
     assert (target/'portable/ocr_rectangles.bat').read_bytes()==bat
+    assert 'docs/user/README.md' in (target/'README.md').read_text(encoding='utf-8')
     assert 'MIT' in (target/'packages/docuworks-integrations/pyproject.toml').read_text()
     assert 'Proprietary' in (repo/'packages/docuworks-integrations/pyproject.toml').read_text()
     with pytest.raises(FileExistsError): export(repo,public,target)
