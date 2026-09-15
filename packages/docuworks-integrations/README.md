@@ -1,46 +1,20 @@
-# docuworks-integrations 0.7.0
+# docuworks-integrations 0.8.0
 
-同じページの領域IDを複数指定する確認用XDWに対応しました。
-[複数領域APIと検証範囲](../../docs/REVIEW_XDW_REGIONS_0.7.0.md)。複数領域はSDK往復に加え、同じ文字を持つ2領域の片方だけをViewer編集・別名保存後に取り込む正常1ケースを検証済みです。
-Viewerの操作・再表示は利用者報告、保存ファイルの照合とJSONL反映はコード検証です。複数領域のViewer異常操作は未確認です。
+保存済みOCR結果を中心に、OCR実行・矩形と確認画像・文字訂正・編集用XDWを提供します。Core 1.0.0を使用します。
 
-1ページ・1領域の確認用XDWの生成と訂正候補の読取りを追加しました。
-[API仕様](../../docs/REVIEW_XDW_0.7.0.md) ／ [SDK・Viewer検証記録](../../docs/REVIEW_XDW_VERIFICATION.md)。
-形式1.0の1ページ・1領域の原本重ね合わせ型についても、SDK往復とViewer編集・別名保存後の取り込みを検証済みです。白紙型は対象外です。
+この開発候補ではPaddleの空文字・空白だけの認識結果を除外し、正常文字を保持して処理を継続します。
+不正な座標・信頼度・非文字列は引き続き拒否します。公開Portable v0.3.0には未反映です。
+[再現手順と検証範囲](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.4.0/docs/maintainer/PADDLE_BLANK_TEXT.md)
 
-Pythonから保存済みOCR文字を別JSONで訂正し、元bundleを保ったまま修正後JSONLを生成できます。
-使用例・保存形式・例外は [文字訂正基盤](../../docs/CORRECTIONS_0.7.0.md) を参照してください。
-Core、既存CLI、Portableの動作は維持しています。
+- [全体のAPI案内](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.4.0/docs/api/README.md)
+- [保存形式とAPIの正本](OCR_RESULT_FORMAT.md)
+- [白紙Review・独立したReviewed Result 1.0の仕様とAPI](REVIEWED_RESULT_FORMAT.md)
+- [訂正の検証・保存・適用](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.4.0/docs/api/corrections.md)
+- [編集用XDW：1ページ内の指定領域](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.4.0/docs/api/review-regions.md)
+- [利用手順](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.4.0/docs/user/README.md) ／ [検証範囲](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.4.0/docs/history/README.md)
 
-## 0.6.0 統合機能
+標準OCRのBATは全ページOCR・矩形・確認画像と任意JSONLを生成します。編集用XDWと訂正はPython APIで明示実行します。元runを変更せず、文字以外の座標・順序・信頼度を維持します。
 
-保存結果を使うannotate-rectanglesとrender-text-maps、複数入力をまとめるprocess-documentsを追加しました。矩形は塗りなし・1ptで保存と再オープンを検証します。OCR bundleは保持し、派生成果物は別ディレクトリへ保存します。各CLIの--helpで引数を確認できます。
+旧workflow APIは0.2.0形式との互換用です。新規コードではrecognition、results、consumersを利用してください。新規OCRはResult 1.1、1.0・旧runは読込み互換です。
 
-## 0.5.0 フォルダOCR
-
-ocr-folder --input-dir ... --batch-dir ... --model-root ... を追加しました。通常は直下、--recursiveでサブフォルダも含め、各XDWの全ページを独立runに保存します。既知の文書エラーは記録して継続し、GPU等の共通障害は停止します。操作・API・失敗の詳細はSETUP_PYTHON313.mdを参照してください。
-
-## 0.4.0 複数ページOCR
-
---all-pages / --pages 1,3-5 を追加。新規結果は形式1.1、検出0件は正常な空ページとして保存します。旧1.0読込みは維持します。
-
-## 0.3.0 OCR結果の分離
-
-OCR実行、版管理されたOCR結果、保存結果の利用を分離したDocuWorks連携ライブラリです。
-
-- Recognition：XDWの全ページまたは指定ページを300/600dpiで画像化し、PP-OCRv6 mediumで認識。
-- Results：Rawとは別に、文字列・px/mm座標・ページ情報・固定IDをJSONで保存。
-- Consumers：保存結果からマーカーまたはJSONLを生成。OCRを再実行しません。
-
-導入とCLIはSETUP_PYTHON313.md、保存形式とPython APIはOCR_RESULT_FORMAT.mdを参照してください。
-Core 1.0.0を維持し、実行検証基準はWindows x64 / Python 3.13.15です。
-OCR環境はPaddle GPU 3.2.2 CUDA 12.9、PaddleOCR 3.7.0、PaddleX 3.7.2です。
-
-既存OcrRegion、OcrEngine、JsonOcrEngine、注釈APIは維持しています。
-workflow.ocr_xdwとworkflow.mark_regionは0.2.0形式用のPython互換APIとして残ります。
-新規コードはrecognition.ocr_xdwとconsumers.mark_regionを使います。
-CLIのocr-xdwは0.3.0からmanifest.jsonを持つ新形式を出力します。
-元文書は変更せず、新規XDWへ保存して再オープン検証します。Viewer確認は別記録です。
-
-
-> 集約版の運用入口: [README](../../README.md)。試験件数・既知不具合・Viewer確認範囲は[検証記録](../../docs/VERIFICATION.md)を正としてください。
+新しい白紙Reviewは全ページの独立SessionとReviewed Resultを提供し、Portableから生成・取り込みできます。Viewerの基本編集は利用者確認済みで、その他はSDK代替操作の検証です。検索・テンプレートは対象外です。

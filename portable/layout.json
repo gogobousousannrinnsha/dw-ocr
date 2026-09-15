@@ -1,0 +1,27 @@
+{
+  "schema": "dw-ocr-portable-layout",
+  "schema_version": "1.0",
+  "provenance": "Existing v0.3.0 launchers imported from the verified public Portable; no new launch behavior.",
+  "files": [
+    "OCR開始.bat",
+    "校正結果取込.bat",
+    "docuworks-integrations.bat",
+    "ocr_rectangles.bat",
+    "ocr_xdw.bat",
+    "python.bat",
+    "repair_project_wheels.bat",
+    "shell.bat",
+    "text_maps.bat",
+    "verify_environment.bat",
+    "verify_environment.py",
+    "settings.ini",
+    "scripts/start_ocr.py",
+    "scripts/import_reviewed.py",
+    "scripts/ocr_all_regions_to_rectangles.py",
+    "scripts/generate_bundle_text_maps.py"
+  ],
+  "templates": {
+    "public_readme": "templates/public-readme.txt",
+    "portable_readme": "templates/portable-readme.txt"
+  }
+}

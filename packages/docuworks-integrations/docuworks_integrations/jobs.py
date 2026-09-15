@@ -20,7 +20,7 @@ def _journal(folder, payload):
 
 
 def process_documents(inputs, output_dir, runs_dir, model_root, *, settings=None,
-                      dll_path=None, excluded=(), engine=None):
+                      dll_path=None, excluded=(), engine=None, review=False):
     """Fresh job directories; shared engine; all pages in one run per document.
 
     Returns a job dictionary with exit_code 0/1/130. Invalid preflight raises.
@@ -28,6 +28,8 @@ def process_documents(inputs, output_dir, runs_dir, model_root, *, settings=None
     """
     settings = settings or Settings()
     if not isinstance(settings,Settings): raise TypeError('settings must be Settings')
+    if type(review) is not bool: raise TypeError('review must be bool')
+    stages = ('ocr', 'review', 'rectangles', 'text_maps', 'jsonl') if review else ('ocr', 'rectangles', 'text_maps', 'jsonl')
     output, runs = Path(output_dir).resolve(), Path(runs_dir).resolve()
     if output.is_relative_to(runs) or runs.is_relative_to(output):
         raise ValueError('job output and runs directories must be separate')
@@ -44,7 +46,9 @@ def process_documents(inputs, output_dir, runs_dir, model_root, *, settings=None
         source_diagnostic_path=str(p),run_dir=Path(os.path.relpath(runs/f'doc-{i:06d}',output)).as_posix(),
         output_dir=f'doc-{i:06d}',ocr='PENDING',rectangles='PENDING',text_maps='PENDING',
         jsonl='PENDING' if settings.jsonl else 'DISABLED',errors=[]) for i,p in enumerate(sources,1)]
-    job = dict(schema='dw-ocr-job',schema_version='1.0',integration_version=__version__,
+    if review:
+        for record in records: record.update(review='PENDING', review_dir=record['output_dir']+'/review-session')
+    job = dict(schema='dw-ocr-job',schema_version='1.1' if review else '1.0',integration_version=__version__,
         job_id=str(uuid.uuid4()),status='RUNNING',started_at=datetime.now(timezone.utc).isoformat(),
         settings=settings.to_dict(),documents=records,exit_code=1)
     _journal(output,job)
@@ -66,7 +70,7 @@ def process_documents(inputs, output_dir, runs_dir, model_root, *, settings=None
             doc_output=output/record['output_dir']; doc_output.mkdir()
             run=runs/record['document_id']
             t=time.perf_counter()
-            for stage in ('ocr','rectangles','text_maps','jsonl'):
+            for stage in stages:
                 if record[stage]=='DISABLED': continue
                 if stage!='ocr' and record['ocr']!='SUCCEEDED': continue
                 active=(record,stage); record[stage]='RUNNING'; _journal(output,job)
@@ -85,6 +89,10 @@ def process_documents(inputs, output_dir, runs_dir, model_root, *, settings=None
                             raise IntegrityError('source changed during OCR')
                         record.update(run_id=result.run_id,manifest_sha256=result.manifest_sha256,
                                       source_sha256=initial)
+                    elif stage=='review':
+                        from .reviewed import create_review_session
+                        session=create_review_session(run,doc_output/'review-session',dll_path=dll_path)
+                        record.update(review_id=session.review_id,review_manifest_sha256=session.manifest_sha256)
                     elif stage=='rectangles':
                         annotate_rectangles(run,doc_output/'annotated.xdw',dll_path=dll_path,
                             padding_mm=settings.padding_mm,minimum_mm=settings.minimum_mm,
@@ -97,7 +105,7 @@ def process_documents(inputs, output_dir, runs_dir, model_root, *, settings=None
                     record[stage]='SUCCEEDED'
                 except (Exception,KeyboardInterrupt) as exc:
                     record[stage]='FAILED'
-                    scope=getattr(exc,'_ocr_failure_scope',failure_scope(exc,'render' if stage=='rectangles' else 'source'))
+                    scope=getattr(exc,'_ocr_failure_scope',failure_scope(exc,'render' if stage in ('rectangles','review') else 'source'))
                     if isinstance(exc,(IntegrityError,SourceChangedError)) or getattr(exc,'_ocr_cleanup_failed',False):
                         scope='batch'
                     record['errors'].append(dict(stage=stage,type=type(exc).__name__,message=str(exc),scope=scope,
@@ -120,8 +128,8 @@ def process_documents(inputs, output_dir, runs_dir, model_root, *, settings=None
         if active and active[0][active[1]]=='RUNNING': active[0][active[1]]='FAILED'
     job['counts']={s:{state:sum(r[s]==state for r in records)
                      for state in ('SUCCEEDED','FAILED','PENDING','DISABLED')}
-                   for s in ('ocr','rectangles','text_maps','jsonl')}
-    failed=any(r[s]=='FAILED' for r in records for s in ('ocr','rectangles','text_maps','jsonl'))
+                   for s in stages}
+    failed=any(r[s]=='FAILED' for r in records for s in stages)
     job.update(status='INTERRUPTED' if isinstance(fatal,KeyboardInterrupt) else 'FAILED' if fatal else
                'PARTIAL_FAILED' if failed else 'COMPLETE' if records else 'NO_INPUT',
                exit_code=130 if isinstance(fatal,KeyboardInterrupt) else 1 if fatal or failed else 0,

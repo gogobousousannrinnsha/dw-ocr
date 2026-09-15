@@ -65,7 +65,9 @@ def content_error(data):
     if isinstance(payload, dict):
         if payload.get('schema') in ('docuworks-ocr-result', 'docuworks-ocr-batch', 'dw-ocr-job',
                                      'docuworks-ocr-corrections', 'docuworks-ocr-effective-region',
-                                     'docuworks-ocr-review', 'docuworks-ocr-review-identity'):
+                                     'docuworks-ocr-review', 'docuworks-ocr-review-identity',
+                                     'docuworks-review-session', 'docuworks-review-session-identity',
+                                     'docuworks-reviewed-result', 'docuworks-reviewed-text'):
             return 'OCR run manifest'
         raw = payload.get('res', payload)
         if isinstance(raw, dict) and {'rec_texts', 'rec_polys'} <= raw.keys():

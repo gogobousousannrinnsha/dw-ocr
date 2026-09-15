@@ -19,14 +19,19 @@ def main(argv=None):
         settings=replace(settings,font=str((root/settings.font).resolve()))
     job='job-'+datetime.now().strftime('%Y%m%d-%H%M%S')+'-'+uuid.uuid4().hex[:8]
     result=process_documents(arguments or [root/'INPUT'],root/'OUTPUT'/job,root/'runs'/job,
-        root/'models',settings=settings,
+        root/'models',settings=settings,review=True,
         excluded=[root/p for p in ('OUTPUT','runs','cache','ocr-cache','runtime','models')])
     print('\n'+('対象のXDW文書がありません。INPUTまたは指定フォルダを確認してください。'
           if result['status']=='NO_INPUT' else '処理結果: '+result['status']))
-    for name in ('ocr','rectangles','text_maps'):
+    for name in ('ocr','review','rectangles','text_maps'):
         c=result['counts'][name]
         print(f"{name}: 成功 {c['SUCCEEDED']} / 失敗 {c['FAILED']} / 未処理 {c['PENDING']}")
     print('保存先: '+str(root/'OUTPUT'/job))
+    for record in result['documents']:
+        if record.get('review')=='SUCCEEDED':
+            print('校正する文書: '+str(root/'OUTPUT'/job/record['review_dir']/'review.xdw'))
+    if result['counts']['review']['SUCCEEDED']:
+        print('Viewerで編集・保存して閉じた後、review.xdwを「校正結果取込.bat」へドロップしてください。')
     return result['exit_code']
 
 

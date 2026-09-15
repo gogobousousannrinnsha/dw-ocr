@@ -1,4 +1,4 @@
-"""Run correction/review tests using only the freshly extracted sdist's files."""
+"""Run correction/review/Paddle parsing tests from the unmodified sdist."""
 import argparse
 import hashlib
 import json
@@ -49,7 +49,9 @@ def verify(archive, output):
     probe = 'import docuworks_integrations as p; from pathlib import Path; import sys; assert Path(p.__file__).is_relative_to(Path(sys.argv[1]))'
     subprocess.run([sys.executable, '-c', probe, str(source)], cwd=output, env=env, check=True)
     result = subprocess.run([sys.executable, '-m', 'pytest', 'tests/test_corrections.py',
-                             'tests/test_review_xdw.py', 'tests/test_review_xdw_regions.py', '-q', '-p', 'no:cacheprovider',
+                             'tests/test_review_xdw.py', 'tests/test_review_xdw_regions.py',
+                             'tests/test_paddle_blank.py', 'tests/test_reviewed.py',
+                             'tests/test_reviewed_jobs.py', '-q', '-p', 'no:cacheprovider',
                              '--junitxml=' + str(output / 'junit.xml')], cwd=source, env=env)
     after = hashes(unpacked)
     added = set(after) - set(before)

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from math import isfinite
+import logging
 
 from .models import OcrRegion, PixelPoint, PixelRect
 
@@ -13,7 +14,10 @@ def parse_paddle_result(payload: dict, width: int, height: int) -> tuple[OcrRegi
     if not (len(texts) == len(scores) == len(polygons)):
         raise ValueError("OCR texts/scores/polygons have different lengths")
     regions = []
+    skipped = 0
     for text, score, polygon in zip(texts, scores, polygons):
+        if not isinstance(text, str):
+            raise ValueError("OCR text must be a non-empty string")
         if len(polygon) != 4 or any(len(p) != 2 for p in polygon):
             raise ValueError("OCR polygon must contain four xy points")
         points = tuple(PixelPoint(*p) for p in polygon)
@@ -24,7 +28,19 @@ def parse_paddle_result(payload: dict, width: int, height: int) -> tuple[OcrRegi
             raise ValueError("OCR polygon has zero area")
         x, y = min(p.x for p in points), min(p.y for p in points)
         bbox = PixelRect(x, y, max(p.x for p in points) - x, max(p.y for p in points) - y)
-        regions.append(OcrRegion(text, bbox, float(score), points))
+        confidence = float(score)
+        if not isfinite(confidence):
+            raise ValueError("confidence must be finite")
+        if confidence < 0 or confidence > 1:
+            raise ValueError("confidence must be between 0 and 1")
+        # Validate even discarded rows: blank recognition is allowed, malformed
+        # engine output is not. Keep the canonical OcrRegion contract strict.
+        if not text.strip():
+            skipped += 1
+            continue
+        regions.append(OcrRegion(text, bbox, confidence, points))
+    if skipped:
+        logging.getLogger(__name__).warning("Skipped %d blank OCR text region(s)", skipped)
     return tuple(regions)
 
 

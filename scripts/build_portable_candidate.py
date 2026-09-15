@@ -14,6 +14,7 @@ import shutil
 import struct
 import zipfile
 from email.parser import BytesParser
+from distribution_layout import load_layout, render_readme
 
 
 def digest(path):
@@ -25,8 +26,11 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
     if digest(baseline)!=expected_hash: raise ValueError('baseline SHA-256 mismatch')
     if output.exists(): raise FileExistsError(output)
     if not re.fullmatch(r'v\d+\.\d+\.\d+',release_version): raise ValueError('invalid release version')
-    changes={p.relative_to(portable).as_posix():p.read_bytes() for p in portable.rglob('*')
-             if p.is_file() and '__pycache__' not in p.parts}
+    layout = load_layout(portable)
+    if source is None:
+        raise ValueError('complete public source is required for managed documentation')
+    changes={name:(portable/name).read_bytes() for name in layout['files']}
+    origins={name:'source' for name in changes}
     for name in tuple(changes):
         if name.endswith('.bat'):
             # ASCII BAT syntax and a Japanese filename; CRLF for cmd.exe.
@@ -36,6 +40,7 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
     versions={}
     for wheel in wheel_paths:
         changes['wheelhouse/'+wheel.name]=wheel.read_bytes()
+        origins['wheelhouse/'+wheel.name]='wheel'
         with zipfile.ZipFile(wheel) as archive:
             metadata_names=[n for n in archive.namelist() if n.endswith('.dist-info/METADATA')]
             if len(metadata_names)!=1: raise ValueError('ambiguous wheel metadata')
@@ -47,6 +52,7 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
                 if '.data/' in name or PurePosixPath(name).is_absolute() or '..' in PurePosixPath(name).parts or ':' in name:
                     raise ValueError('unexpected wheel data layout')
                 changes['runtime/Lib/site-packages/'+name]=archive.read(name)
+                origins['runtime/Lib/site-packages/'+name]='wheel'
     if set(versions)!={'docuworks-ctypes','docuworks-integrations'}: raise ValueError('unexpected wheel packages')
     version=versions['docuworks-integrations']
     if versions['docuworks-ctypes']!='1.0.0' or not re.fullmatch(r'\d+\.\d+\.\d+',version):
@@ -57,38 +63,43 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
         source=Path(source)
         project=(source/'packages/docuworks-integrations/pyproject.toml').read_text(encoding='utf-8')
         if f'version = "{version}"' not in project: raise ValueError('source/wheel version mismatch')
-        for folder in ('docs','examples'):
+        for folder in ('docs','examples','packages','requirements','scripts'):
             for path in (source/folder).rglob('*'):
-                if path.is_file() and '__pycache__' not in path.parts:
-                    changes[path.relative_to(source).as_posix()]=path.read_bytes()
-    changes['README.txt']=(f'DW-OCR {release_version} Pre-release / Integrations {version}\n'
-        'INPUTへXDWを入れOCR開始.batを実行、またはXDWとフォルダをドロップします。\n'
-        '全ページをOCRし、赤い矩形と確認画像をOUTPUTへ保存します。\n'
-        'OCRの保存結果はrunsに保持します。設定はsettings.ini。\n'
-        '実行には対応するDocuWorksとNVIDIA GPUが必要です。\n'
-        '文字訂正・確認用XDWはPython APIです。docsとexamplesを参照してください。\n'
-        '原本重ね合わせ型・1ページ内の指定領域に対応。白紙型・検索・テンプレートは対象外です。\n'
-        '既知のマーカー線幅問題は今回の矩形経路とは別課題です。\n').encode('utf-8-sig')
+                if path.is_file() and not any(part in ('__pycache__','build','dist','.pytest_cache','integration-artifacts') or part.endswith('.egg-info') for part in path.relative_to(source).parts):
+                    name=path.relative_to(source).as_posix()
+                    # Runtime scripts from portable are authoritative if names overlap.
+                    if name not in changes:
+                        changes[name]=path.read_bytes()
+                        origins[name]='source'
+    changes['README.txt']=render_readme(portable, 'portable_readme', versions, release_version).encode('utf-8-sig')
+    # Package/Core documentation links to the source root README as well.
+    changes['README.md']=render_readme(portable, 'public_readme', versions, release_version).encode('utf-8')
+    repair='repair_project_wheels.bat'
+    if repair in changes:
+        text=changes[repair].decode('utf-8-sig')
+        for package, selected_version in versions.items():
+            text=re.sub(re.escape(package)+r'==\d+\.\d+\.\d+',package+'=='+selected_version,text)
+        changes[repair]=text.encode('utf-8')
     changes['PROVENANCE.txt']=(f'DW-OCR {release_version} Pre-release\nBaseline archive SHA256: '+expected_hash+
         f'\nCore 1.0.0; Integrations {version}; Python 3.13.15\n'+
         '\n'.join(w.name+' SHA256 '+digest(w) for w in wheel_paths)+'\n').encode()
     changes['reference/project-wheels.json']=json.dumps({w.name:digest(w) for w in wheel_paths},indent=2).encode()
     for folder in ('INPUT','OUTPUT','runs','cache'): changes[folder+'/']=b''
+    origins.update({name:'generated' for name in changes if name not in origins})
+    inventory_name='reference/distribution-files.json'
     removed=[]
     with zipfile.ZipFile(baseline) as original:
         for name in original.namelist():
-            if name.endswith('.bat') and name not in changes:
-                data=original.read(name)
-                text=data.decode('utf-8-sig')
-                updated=re.sub(r'docuworks-integrations==\d+\.\d+\.\d+',f'docuworks-integrations=={version}',text)
-                # No injection into existence checks, no duplicate execution flags or environment blocks.
-                if updated!=text: changes[name]=updated.encode('utf-8-sig' if data.startswith(b'\xef\xbb\xbf') else 'utf-8')
+            if name.endswith('.bat') and '/' not in name and name not in layout['files']:
+                raise ValueError('unmanaged baseline launcher: '+name)
         # Keep all third-party binary/model/license content, replace only own package/entrypoints.
         for name in original.namelist():
             lower=name.lower()
             if ('__pycache__' in lower or lower.endswith('.pyc') or
                 lower.startswith(('wheelhouse/','runtime/lib/site-packages/docuworks_integrations',
                                   'runtime/lib/site-packages/docuworks_ctypes')) or
+                lower.startswith(('docs/','examples/','packages/','requirements/','scripts/')) or
+                lower == inventory_name or
                 lower in ('sha256sums.txt','tools_sha256sums.txt','tools_provenance.json','installed_packages.txt',
                           'pip_check.txt','readme_tools_ja.txt','public_packaging_changes.txt')):
                 removed.append(name)
@@ -100,6 +111,7 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
                 if name in changes:
                     out.writestr(name,changes.pop(name)); continue
                 if name in removed: continue
+                origins[name]='baseline'
                 if PurePosixPath(name).is_absolute() or '..' in PurePosixPath(name).parts or ':' in name:
                     raise ValueError('unsafe ZIP path')
                 if info.flag_bits&1: raise ValueError('encrypted baseline member')
@@ -114,6 +126,18 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
                     out.fp.write(chunk); remaining-=len(chunk)
                 out.filelist.append(new); out.NameToInfo[name]=new; out.start_dir=out.fp.tell()
             for name,data in sorted(changes.items()): out.writestr(name,data)
+    entries=[]
+    with zipfile.ZipFile(output) as archive:
+        for info in archive.infolist():
+            if not info.is_dir():
+                with archive.open(info) as stream:
+                    value=hashlib.file_digest(stream,'sha256').hexdigest()
+                entries.append(dict(path=info.filename, bytes=info.file_size, sha256=value,
+                                    origin=origins[info.filename]))
+    with zipfile.ZipFile(output,'a',zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr(inventory_name,json.dumps(dict(schema='dw-ocr-distribution-files',
+            schema_version='1.0',candidate=True,baseline_sha256=expected_hash,
+            excluded_self=inventory_name,files=entries),ensure_ascii=False,indent=2).encode('utf-8'))
     with zipfile.ZipFile(output) as archive:
         if archive.testzip() is not None: raise ValueError('Portable CRC failed')
         names=archive.namelist()
