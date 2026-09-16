@@ -5,8 +5,18 @@ from decimal import Decimal, ROUND_HALF_UP
 
 
 def mm_to_xdw(value: float | int | Decimal) -> int:
-    converted = Decimal(str(value)) * 100
+    number = Decimal(str(value))
+    if not number.is_finite():
+        raise ValueError("coordinates must be finite")
+    converted = number * 100
     return int(converted.quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+
+
+def position_to_xdw(value: float | int | Decimal) -> int:
+    converted = mm_to_xdw(value)
+    if not -240000 <= converted <= 240000:
+        raise ValueError("position or vector must be between -2400 and 2400 mm")
+    return converted
 
 
 def xdw_to_mm(value: int) -> float:

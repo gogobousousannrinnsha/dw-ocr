@@ -103,7 +103,8 @@ def _build_standard_registry() -> dict[tuple[int, str], StandardAttributeSpec]:
         allowed_values=_ints(0, 1), conditions=_condition(C.XDW_ATN_WordWrap, 1))
 
     link = C.XDW_AID_LINK
-    add(link, C.XDW_ATN_Caption, "string", "str", unicode_allowed=True)
+    # Defensive product limit; not a vendor guarantee for every encoding.
+    add(link, C.XDW_ATN_Caption, "string", "str", unicode_allowed=True, max_bytes=255)
     for name in (C.XDW_ATN_ShowIcon, C.XDW_ATN_Invisible, C.XDW_ATN_AutoResize,
                  C.XDW_ATN_Tooltip):
         add(link, name, "int32", "bool", allowed_values=_ints(0, 1))
@@ -229,6 +230,8 @@ def _python_to_raw(spec: StandardAttributeSpec, value: Any):
         return value
     if not isinstance(value, (int, float, Decimal)) or isinstance(value, bool):
         raise TypeError(f"{spec.name} requires a numeric value in {spec.python_unit}")
+    if not Decimal(str(value)).is_finite():
+        raise ValueError(f"{spec.name} requires a finite value")
     scaled = Decimal(str(value)) * Decimal(spec.raw_per_python_unit)
     return int(scaled.quantize(Decimal("1"), rounding=ROUND_HALF_UP))
 
@@ -242,8 +245,8 @@ def _raw_to_python(spec: StandardAttributeSpec, value: Any):
             if not absolute:
                 absolute.append(point)
             else:
-                previous = absolute[-1]
-                absolute.append(RawPoint(previous.x + point.x, previous.y + point.y))
+                first = absolute[0]
+                absolute.append(RawPoint(first.x + point.x, first.y + point.y))
         return tuple(point.to_mm() for point in absolute)
     if spec.raw_per_python_unit is None or spec.storage_kind != "int32":
         return value
@@ -285,6 +288,8 @@ def validate_standard_raw_value(
         not isinstance(value, int) or isinstance(value, bool)
     ):
         raise TypeError(f"{spec.name} requires int")
+    if spec.storage_kind == "int32" and not -(2**31) <= value < 2**31:
+        raise ValueError(f"{spec.name} requires a signed 32-bit value")
     comparable = value
     if spec.minimum is not None and comparable < spec.minimum:
         raise ValueError(f"{spec.name} must be >= {spec.minimum}")
@@ -475,6 +480,8 @@ def set_custom_attribute(raw, document_handle, annotation_handle, name: str,
     elif kind in (CustomAttributeKind.INT, CustomAttributeKind.DATE):
         if not isinstance(value, int) or isinstance(value, bool):
             raise TypeError(f"{kind.name} custom attribute requires a raw 32-bit int")
+        if not -(2**31) <= value < 2**31:
+            raise ValueError(f"{kind.name} requires a signed 32-bit value")
         storage = ctypes.c_int32(value)
         pointer = ctypes.cast(ctypes.byref(storage), ctypes.c_char_p)
     else:

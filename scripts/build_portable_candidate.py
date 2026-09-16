@@ -55,14 +55,19 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
                 origins['runtime/Lib/site-packages/'+name]='wheel'
     if set(versions)!={'docuworks-ctypes','docuworks-integrations'}: raise ValueError('unexpected wheel packages')
     version=versions['docuworks-integrations']
-    if versions['docuworks-ctypes']!='1.0.0' or not re.fullmatch(r'\d+\.\d+\.\d+',version):
-        raise ValueError('expected Core 1.0.0 and stable Integrations')
+    if not re.fullmatch(r'1\.\d+\.\d+',versions['docuworks-ctypes']) or not re.fullmatch(r'\d+\.\d+\.\d+',version):
+        raise ValueError('expected stable Core 1.x and Integrations')
     init=changes['runtime/Lib/site-packages/docuworks_integrations/__init__.py'].decode('utf-8')
     if f'__version__ = "{version}"' not in init: raise ValueError('wheel/runtime version mismatch')
     if source is not None:
         source=Path(source)
         project=(source/'packages/docuworks-integrations/pyproject.toml').read_text(encoding='utf-8')
         if f'version = "{version}"' not in project: raise ValueError('source/wheel version mismatch')
+        for package, expected in versions.items():
+            project_metadata=(source/'packages'/package/'pyproject.toml').read_text(encoding='utf-8')
+            module=package.replace('-','_')
+            if f'version = "{expected}"' not in project_metadata or f'__version__ = "{expected}"' not in changes[f'runtime/Lib/site-packages/{module}/__init__.py'].decode('utf-8'):
+                raise ValueError('source/wheel/runtime version mismatch: '+package)
         for folder in ('docs','examples','packages','requirements','scripts'):
             for path in (source/folder).rglob('*'):
                 if path.is_file() and not any(part in ('__pycache__','build','dist','.pytest_cache','integration-artifacts') or part.endswith('.egg-info') for part in path.relative_to(source).parts):
@@ -81,7 +86,7 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
             text=re.sub(re.escape(package)+r'==\d+\.\d+\.\d+',package+'=='+selected_version,text)
         changes[repair]=text.encode('utf-8')
     changes['PROVENANCE.txt']=(f'DW-OCR {release_version} Pre-release\nBaseline archive SHA256: '+expected_hash+
-        f'\nCore 1.0.0; Integrations {version}; Python 3.13.15\n'+
+        f"\nCore {versions['docuworks-ctypes']}; Integrations {version}; Python 3.13.15\n"+
         '\n'.join(w.name+' SHA256 '+digest(w) for w in wheel_paths)+'\n').encode()
     changes['reference/project-wheels.json']=json.dumps({w.name:digest(w) for w in wheel_paths},indent=2).encode()
     for folder in ('INPUT','OUTPUT','runs','cache'): changes[folder+'/']=b''

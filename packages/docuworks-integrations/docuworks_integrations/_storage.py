@@ -14,8 +14,16 @@ import uuid
 
 
 def note(error, message):
-    if hasattr(error, 'add_note'):
-        error.add_note(message)
+    # Keep diagnostic paths available to JSON reports on Python 3.10 too.
+    # Diagnostics must never replace the failure they describe.
+    try:
+        add_note = getattr(error, 'add_note', None)
+        if callable(add_note):
+            add_note(message)
+        else:
+            error.__notes__ = [*getattr(error, '__notes__', []), message]
+    except Exception:
+        pass
 
 
 def require_public_result(path):

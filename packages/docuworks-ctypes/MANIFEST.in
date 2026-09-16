@@ -1,0 +1,4 @@
+include *.md
+include *.json
+include *.py
+recursive-include tests *.py

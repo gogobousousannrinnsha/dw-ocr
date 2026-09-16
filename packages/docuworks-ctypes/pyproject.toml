@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "docuworks-ctypes"
-version = "1.0.0"
+version = "1.0.1"
 description = "Verified ctypes, Core, and Simple APIs for the DocuWorks XDWAPI"
 readme = "README.md"
 requires-python = ">=3.10"

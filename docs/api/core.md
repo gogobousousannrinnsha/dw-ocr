@@ -1,6 +1,8 @@
-# docuworks-ctypes 1.0.0 日本語仕様書
+# docuworks-ctypes 1.0.1 日本語仕様書
 
-対象: 提示された `docuworks_ctypes-1.0.0-py3-none-any.whl` と `docuworks-ctypes-1.0.0-source.zip` の実装。作成日: 2026-09-05。
+1.0.1更新：座標・入力防御・例外保持は[変更記録](../../packages/docuworks-ctypes/CHANGELOG_1.0.1.md)と[対応台帳](../maintainer/CORE_1.0.1_ISSUES.md)を優先します。元の1.0.0検証件数は履歴です。
+
+元資料: 提示された `docuworks_ctypes-1.0.0-py3-none-any.whl` と `docuworks-ctypes-1.0.0-source.zip` の実装。作成日: 2026-09-05。
 
 本書は利用者と保守開発者向けに、実装上の振る舞い、公開インターフェース、制約、検証範囲を整理したものです。1.0.0のコードや既存の安定性契約を変更する文書ではありません。入力資料の説明と実装が異なる箇所は、その差を明記します。旧版の仕様書を別途開かずに主要機能を確認できます。
 
@@ -57,7 +59,7 @@ Simple／Coreの文書処理対象は既存文書です。新規空白XDW生成�
 | Text各margin | mm | 1/100 mmの整数 |
 | TextOrientation | degree | 1 degreeの整数 |
 | `%Points`自然getter | 絶対座標の`tuple[PointMM, ...]` | — |
-| `%Points`raw getter | `tuple[RawPoint, ...]` | 先頭が絶対座標、以後が直前点からの相対移動量。単位は1/100 mm |
+| `%Points`raw getter | `tuple[RawPoint, ...]` | 先頭が絶対座標、以後が第1点からの相対移動量。単位は1/100 mm |
 
 mmと標準属性の単位変換は`Decimal(str(value))`と`ROUND_HALF_UP`で丸めます。ページ番号とANN内番号は1始まりです。親アノテーション上に追加するTextの位置は親に対する座標です。Simpleの付箋に`text=`を指定した場合、Core既定の`PointMM(2, 2)`位置へ子Textを追加します。
 
@@ -459,7 +461,7 @@ Standard／Custom／Userは別体系です。Standardの`%`付き名称をCustom
 
 | 属性名 | アクセス | 自然型 | raw格納 | 自然単位 → raw単位 | Unicode保存 | 制約（raw基準） |
 | --- | --- | --- | --- | --- | --- | --- |
-| `%Caption` | R/W | `str` | `string` | — | 可 | 追加なし |
+| `%Caption` | R/W | `str` | `string` | — | 可 | 暫定防御255 bytes、終端除外。SDK正式上限ではない |
 | `%ShowIcon` | R/W | `bool` | `int32` | — | — | 許容{0, 1} |
 | `%Invisible` | R/W | `bool` | `int32` | — | — | 許容{0, 1} |
 | `%AutoResize` | R/W | `bool` | `int32` | — | — | 許容{0, 1} |
@@ -638,7 +640,7 @@ Registryのbytes制限は、選択codepageで表現できればそのbytes数、
 
 ### 7.1 トップレベルの全49公開名
 
-以下は`docuworks_ctypes.__all__`と固定snapshotが記録する全名称です。`__version__`は`1.0.0`として参照できますが、49個の`__all__`には含まれません。
+以下は`docuworks_ctypes.__all__`と固定snapshotが記録する全名称です。`__version__`は`1.0.1`として参照できますが、49個の`__all__`には含まれません。
 
 | 公開名 | 役割 |
 | --- | --- |
@@ -1018,7 +1020,7 @@ def system_ansi_codepage() -> int:
     ...
 ```
 
-`RawPoint.to_mm()`はそのx/yを個別に100で割るだけです。raw Points列全体を絶対座標へ累積変換する操作はStandard自然getter側にあります。raw列の全点へ単純に`to_mm()`を適用するだけでは、2点目以降は相対値のままです。
+`RawPoint.to_mm()`はそのx/yを個別に100で割るだけです。raw Points列全体を第1点基準の絶対座標へ変換する操作はStandard自然getter側にあります。raw列の全点へ単純に`to_mm()`を適用するだけでは、2点目以降は相対値のままです。
 
 ### 7.4 安定性の宣言と機械検証の違い
 
@@ -1052,7 +1054,7 @@ def system_ansi_codepage() -> int:
 
 `XdwError`には`result`（signed int32）、`unsigned_result`（unsigned int32）、`operation`（呼出し箇所の文字列）、`symbol`（既知エラー名または`None`）があります。メッセージには16進コードを含みます。非負の戻り値は成功として扱うため、戻り値が正のサイズ・件数である関数を0のみ成功として扱いません。
 
-`Document.__exit__`はwith本体の例外がないclose失敗を送出し、本体例外があるclose失敗は本体例外へnoteを追加して元の例外を継続する意図です。ただし1.0.0は`exc.add_note()`を無条件に使うため、Python 3.10ではこの二重障害経路で`AttributeError`が発生します。これは対応宣言と実装の不一致です。配布wheelを新規環境へ導入した追加試験で再現しました。例外処理の3ケースはPython 3.10で2成功・1失敗、3.11で3成功です。再現条件と回避策は検証報告書に記載します。1.0.0のコードは今回修正していません。
+`Document.__exit__`は本体例外がないclose失敗を送出し、本体例外がある場合は元例外を維持します。3.11以降は可能ならclose失敗を注記し、3.10では注記を省略します。注記の失敗でも元例外は置き換えません。1.0.0にあった無条件add_noteの問題は1.0.1で修正しました。
 
 独自例外へすべてを統一する層はなく、引数誤りと生存状態違反が重なる場合の優先順位も全API共通ではありません。たとえばSimpleのenum検査はCoreのread-only検査より先に実行されます。
 
@@ -1222,7 +1224,7 @@ XDW_InsertOriginalDataW: (C.c_int32, (T.XDW_DOCUMENT_HANDLE, C.c_int32, C.POINTE
 
 - User 0-byte値は呼出しの非NULL表現を確認していても、XDWAPI 10.1.1でGET／永続取得は保証されません。
 - Custom DATEはraw int32であり、日付への意味変換はありません。Simpleに日付印新規作成はなく、既存日付印の列挙・対応属性操作と区別します。
-- StandardのPointsは3種類とも読取り専用です。Pointsのraw表現は先頭絶対＋後続相対で、自然getterは累積した絶対mm値です。
+- StandardのPointsは3種類とも読取り専用です。Pointsのraw表現は先頭絶対＋後続相対で、自然getterは第1点基準で復号した絶対mm値です。
 - 操作失敗時のrollback、wrapper間のキャッシュ同期、削除の全wrapper横断通知、persistent ID、スレッド間の文書操作保証はありません。
 - Python 3.10の本体例外＋close失敗時に`add_note`の不具合があります。従来の通常経路の契約テスト合格から、この異常経路まで対応済みと判断できません。
 - 従来の10.1.1記録ではDateFormatの`yy.mm.dd`が永続化し、`yy.MM.dd`が拒否されました。本実装は小文字形式の許容リストを維持します。TopFieldについて実機がRegistryより長い入力を受理した観察があっても、wrapperの制限を緩める根拠にはしていません。

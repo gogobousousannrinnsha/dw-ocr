@@ -55,7 +55,7 @@ def test_points_raw_and_natural_contracts_are_distinct():
     assert get_standard_attribute(raw, 1, spec) == (
         PointMM(10.0, 20.0),
         PointMM(15.0, 15.0),
-        PointMM(12.5, 25.0),
+        PointMM(7.5, 30.0),
     )
 
 
@@ -66,7 +66,7 @@ def test_polygon_initial_points_use_first_absolute_then_relative_vectors():
     assert [(point.x, point.y) for point in storage] == [
         (1000, 2000),
         (500, -500),
-        (-250, 1000),
+        (250, 500),
     ]
 
 

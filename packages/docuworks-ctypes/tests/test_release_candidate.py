@@ -61,7 +61,7 @@ def test_simple_api_reference_covers_fixed_public_surface():
 def test_release_documents_exist_and_version_is_consistent():
     from docuworks_ctypes import __version__
 
-    assert __version__ == "1.0.0"
+    assert __version__ == "1.0.1"
     for name in (
         "COMPATIBILITY_1.0.md",
         "RELEASE_POLICY.md",

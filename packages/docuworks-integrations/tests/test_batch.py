@@ -33,7 +33,7 @@ def test_folder_real_bundles_and_shared_model(fake, tmp_path, monkeypatch, capsy
     before = {str(p): sha256(p) for p in root.rglob('*.xdw')}
     output = tmp_path / 'batch'
     result = batch.ocr_folder(root, output, tmp_path, recursive=True)
-    assert result.status == 'COMPLETE' and result.exit_code == 0
+    assert result.status == 'COMPLETE' and result.exit_code == 0, result.to_dict()
     assert [d.source_relative_path for d in result.documents] == ['a.xdw', 'b.XDW', 'nested/a.xdw']
     assert len(instances) == 1 and instances[0].calls == [1, 2, 3] * 3
     assert Renderer.instances == 3

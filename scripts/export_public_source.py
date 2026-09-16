@@ -18,6 +18,11 @@ def export(repo, baseline_public, output, *, release_version='v0.3.0'):
     runtime=(repo/'packages/docuworks-integrations/docuworks_integrations/__init__.py').read_text(encoding='utf-8')
     if f'__version__ = "{version}"' not in runtime or not re.fullmatch(r'\d+\.\d+\.\d+',version):
         raise ValueError('stable package and runtime versions must match')
+    core_metadata=(repo/'packages/docuworks-ctypes/pyproject.toml').read_text(encoding='utf-8')
+    core_version=re.search(r'^version = "([^"]+)"$',core_metadata,re.M).group(1)
+    core_runtime=(repo/'packages/docuworks-ctypes/docuworks_ctypes/__init__.py').read_text(encoding='utf-8')
+    if not re.fullmatch(r'1\.\d+\.\d+',core_version) or f'__version__ = "{core_version}"' not in core_runtime:
+        raise ValueError('stable Core 1.x package and runtime versions must match')
     load_layout(repo/"portable")
     if output.exists(): raise FileExistsError(output)
     output.mkdir(parents=True)
@@ -70,7 +75,7 @@ def export(repo, baseline_public, output, *, release_version='v0.3.0'):
             text=json.dumps(portable_evidence(json.loads(path.read_text(encoding='utf-8'))),ensure_ascii=False,indent=2)+'\n'
         path.write_text(text,encoding='utf-8')
     (output/'README.md').write_text(render_readme(repo/'portable', 'public_readme',
-        {'docuworks-ctypes': '1.0.0', 'docuworks-integrations': version}, release_version), encoding='utf-8')
+        {'docuworks-ctypes': core_version, 'docuworks-integrations': version}, release_version), encoding='utf-8')
     # Public requirements must refer to this export's local packages, never a private URL.
     files=[]
     for path in sorted(output.rglob('*')):

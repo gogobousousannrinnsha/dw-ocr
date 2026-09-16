@@ -1,6 +1,6 @@
 # DW-OCR v0.4.1
 
-Core 1.0.0 / Integrations 0.8.1。Windows x64用Pre-releaseです。
+Core 1.0.1 / Integrations 0.8.1。Windows x64用Pre-releaseです。
 
 - [利用者向け操作・設定・保存先](docs/user/README.md)
 - [Python API・結果形式・訂正](docs/api/README.md)
