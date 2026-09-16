@@ -2,8 +2,16 @@ name: DLL-free tests and publication audit
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
   workflow_dispatch:
+    inputs:
+      upload_artifacts:
+        description: "Save audited wheel and sdist artifacts"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -175,6 +183,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Upload audited distributions
+        if: github.event_name == 'workflow_dispatch' && inputs.upload_artifacts
         uses: actions/upload-artifact@v4
         with:
           name: audited-python-distributions
