@@ -7,6 +7,25 @@ from docuworks_integrations import recognition, results
 from test_multipage import fake, Engine
 
 
+def test_diagnostic_notes_without_add_note():
+    class LegacyError(Exception):
+        add_note = None
+    error = LegacyError('primary')
+    storage.note(error, 'first diagnostic')
+    storage.note(error, 'second diagnostic')
+    assert error.__notes__ == ['first diagnostic', 'second diagnostic']
+    assert str(error) == 'primary'
+
+
+def test_broken_note_does_not_replace_original_error():
+    class BrokenError(Exception):
+        def add_note(self, message):
+            raise RuntimeError('note failed')
+    error = BrokenError('primary')
+    storage.note(error, 'diagnostic')
+    assert str(error) == 'primary'
+
+
 @pytest.mark.parametrize('directory', [False, True])
 def test_publish_refuses_existing_output(tmp_path, directory):
     source, output = tmp_path/'source', tmp_path/'output'

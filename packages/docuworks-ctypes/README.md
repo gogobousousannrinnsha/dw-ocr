@@ -1,4 +1,6 @@
-# docuworks-ctypes 1.0.0
+# docuworks-ctypes 1.0.1
+
+1.0.1の安全性修正と互換性は[変更記録](CHANGELOG_1.0.1.md)を参照してください。以下の1.0.0の検証記述は履歴です。
 
 Windows版DocuWorks XDWAPIのctypesラッパー、検証済みCore API、およびその上に
 構築したSimple APIです。1.0.0は検証済み0.9.0の製品挙動と公開契約を変更せず、
@@ -17,11 +19,11 @@ Simple APIの規範仕様は`SIMPLE_API_SPEC_0.7.0.md`、API一覧は
 利用者側で用意し、wheelには含まれません。
 
 ```powershell
-py -m pip install .\docuworks_ctypes-1.0.0-py3-none-any.whl
+py -m pip install .\docuworks_ctypes-1.0.1-py3-none-any.whl
 py -c "import docuworks_ctypes; print(docuworks_ctypes.__version__)"
 ```
 
-出力が`1.0.0`であることを確認してください。
+出力が`1.0.1`であることを確認してください。
 
 ## Runtime Resolver
 
@@ -93,7 +95,7 @@ annotation.set_standard_attribute_raw("%FillTransparent", 1)
 0.6.2ではPointsのraw契約をbreaking changeしました。自然getterは
 `tuple[PointMM, ...]`の絶対座標、raw getterはXDW格納表現そのままの
 `tuple[RawPoint, ...]`を返します。先頭点は親左上からの絶対座標、2点目以降は
-直前点からの相対移動量です。Pointsは引き続き読取専用です。
+第1点からの相対移動量です。Pointsは引き続き読取専用です。
 
 ## Core annotation creation
 

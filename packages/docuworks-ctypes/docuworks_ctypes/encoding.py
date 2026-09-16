@@ -39,6 +39,7 @@ class MultibyteEncodingPolicy:
         return cls(codepage=resolved, codec=codec)
 
     def encode(self, value: str) -> bytes:
+        validate_text(value)
         return value.encode(self.codec)
 
     def encoded_length(self, value: str, *, unicode_allowed: bool) -> int:
@@ -50,7 +51,15 @@ class MultibyteEncodingPolicy:
             return len(value.encode("utf-16-le"))
 
 
+def validate_text(value: str) -> None:
+    if not isinstance(value, str):
+        raise TypeError("native text requires str")
+    if "\0" in value:
+        raise ValueError("native text must not contain an embedded NUL")
+
+
 def wchar_buffer(value: str):
+    validate_text(value)
     encoded = value.encode("utf-16-le") + b"\0\0"
     units = len(encoded) // 2
     array_type = T.XDW_WCHAR * units

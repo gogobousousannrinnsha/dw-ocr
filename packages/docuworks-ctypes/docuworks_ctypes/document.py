@@ -41,7 +41,7 @@ from .errors import (
     ReadOnlyDocumentError,
     check_result,
 )
-from .geometry import PointMM, RectMM, SizeMM, mm_to_xdw, xdw_to_mm
+from .geometry import PointMM, RectMM, SizeMM, mm_to_xdw, position_to_xdw, xdw_to_mm
 
 
 class Document:
@@ -72,7 +72,13 @@ class Document:
         except Exception as close_error:
             if exc is None:
                 raise
-            exc.add_note(f"文書クローズ時にもエラーが発生しました: {close_error}")
+            # Cleanup diagnostics must never replace the original exception.
+            try:
+                add_note = getattr(exc, "add_note", None)
+                if callable(add_note):
+                    add_note(f"文書クローズ時にもエラーが発生しました: {close_error}")
+            except Exception:
+                pass
         return False
 
     @property
@@ -227,7 +233,7 @@ class Page:
                 ctypes.byref(initial_data), ctypes.POINTER(T.XDW_AA_INITIAL_DATA)
             )
         new_handle = T.XDW_ANNOTATION_HANDLE()
-        x, y = mm_to_xdw(position.x), mm_to_xdw(position.y)
+        x, y = position_to_xdw(position.x), position_to_xdw(position.y)
         if parent is None:
             result = self.raw.XDW_AddAnnotation(
                 self.document.handle,
@@ -297,6 +303,12 @@ class Page:
         back_color: Color | int | None = None,
         parent: "Annotation | None" = None,
     ) -> "Annotation":
+        validate_standard_value(
+            standard_attribute_spec(C.XDW_AID_TEXT, C.XDW_ATN_Text), text,
+            encoding_policy=self.document.multibyte_encoding,
+        )
+        if font_name is not None:
+            self.document.multibyte_encoding.encode(font_name)
         annotation = self._add(AnnotationType.TEXT, position, parent=parent)
         annotation.set_standard_attribute(C.XDW_ATN_Text, text)
         for name, value in (
@@ -320,6 +332,11 @@ class Page:
         text: str | None = None,
         text_position: PointMM = PointMM(2, 2),
     ) -> "Annotation":
+        if text is not None:
+            validate_standard_value(
+                standard_attribute_spec(C.XDW_AID_TEXT, C.XDW_ATN_Text), text,
+                encoding_policy=self.document.multibyte_encoding,
+            )
         data = T.XDW_AA_FUSEN_INITIAL_DATA()
         self._initial_common(data, AnnotationType.STICKY)
         data.nWidth = mm_to_xdw(size.width)
@@ -349,8 +366,8 @@ class Page:
     ) -> "Annotation":
         data = T.XDW_AA_STRAIGHTLINE_INITIAL_DATA()
         self._initial_common(data, AnnotationType.STRAIGHT_LINE)
-        data.nHorVec = mm_to_xdw(end.x - start.x)
-        data.nVerVec = mm_to_xdw(end.y - start.y)
+        data.nHorVec = position_to_xdw(end.x - start.x)
+        data.nVerVec = position_to_xdw(end.y - start.y)
         annotation = self._add(AnnotationType.STRAIGHT_LINE, start, data)
         annotation._apply_style(
             border_color=border_color,
@@ -401,17 +418,18 @@ class Page:
         if not all(isinstance(point, PointMM) for point in points):
             raise TypeError("points requires a sequence of PointMM")
         raw_points: list[tuple[int, int]] = []
-        previous: tuple[int, int] | None = None
+        first: tuple[int, int] | None = None
         for point in points:
             absolute = (mm_to_xdw(point.x), mm_to_xdw(point.y))
-            encoded = absolute if previous is None else (
-                absolute[0] - previous[0],
-                absolute[1] - previous[1],
+            encoded = absolute if first is None else (
+                absolute[0] - first[0],
+                absolute[1] - first[1],
             )
             if not all(-240000 <= coordinate <= 240000 for coordinate in encoded):
                 raise ValueError("point coordinates must be between -2400 and 2400 mm")
             raw_points.append(encoded)
-            previous = absolute
+            if first is None:
+                first = absolute
         storage = (T.XDW_POINT * len(raw_points))()
         for index, (x, y) in enumerate(raw_points):
             storage[index].x = x
@@ -492,6 +510,13 @@ class Page:
             raise ValueError(f"{normalized_type.name} link requires a non-empty target")
         if size is not None and auto_resize:
             raise ValueError("size requires auto_resize=False")
+        validate_standard_value(
+            standard_attribute_spec(C.XDW_AID_LINK, C.XDW_ATN_Caption), caption,
+            encoding_policy=self.document.multibyte_encoding,
+        )
+        if target is not None:
+            # Validate the target string before creating a native annotation.
+            self.document.multibyte_encoding.encoded_length(target, unicode_allowed=True)
         annotation = self._add(AnnotationType.LINK, position)
         annotation.set_standard_attribute(C.XDW_ATN_Caption, caption)
         annotation.set_standard_attribute(C.XDW_ATN_LinkType, int(normalized_type))
@@ -536,8 +561,8 @@ class Page:
             index,
             self.number,
             parent_handle,
-            mm_to_xdw(position.x),
-            mm_to_xdw(position.y),
+            position_to_xdw(position.x),
+            position_to_xdw(position.y),
             ctypes.byref(new_handle),
             None,
         )
@@ -751,7 +776,7 @@ class Annotation:
     def set_position(self, position: PointMM) -> None:
         self._ensure_valid()
         self.document._ensure_update()
-        x, y = mm_to_xdw(position.x), mm_to_xdw(position.y)
+        x, y = position_to_xdw(position.x), position_to_xdw(position.y)
         result = self.raw.XDW_SetAnnotationPosition(
             self.document.handle, self.handle, x, y, None
         )

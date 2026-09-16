@@ -87,3 +87,15 @@ def test_sdk_changes(native_base,tmp_path,mode):
         if mode=='foreign':assert 'foreign' in origins
         if mode=='all-delete':assert origins==[] and len(r.pages)==3
     assert sha256(edited)==after and sha256(native_base.root/'initial.xdw')==before
+
+
+def test_generated_text_has_no_fill_after_reopen(native_base):
+    from docuworks_ctypes import XdwApi, Color
+    api = XdwApi.load(os.environ['DOCUWORKS_REVIEWED_DLL'])
+    for path in (native_base.root / 'initial.xdw', native_base.review_xdw):
+        with api.open_document(path) as document:
+            annotations = [a for n in range(1, document.page_count + 1)
+                           for a in document.page(n).annotations(recursive=False)]
+            assert annotations
+            assert all(a.get_standard_attribute_raw('%BackColor') == int(Color.NONE)
+                       for a in annotations)

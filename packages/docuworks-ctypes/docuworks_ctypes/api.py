@@ -157,6 +157,8 @@ class XdwApi:
             raise FileNotFoundError(resolved)
         mode = OpenMode(mode)
         auth = AuthMode(auth)
+        if auth not in (AuthMode.NONE, AuthMode.NO_DIALOG):
+            raise ValueError("open_document auth supports NONE or NO_DIALOG only")
         open_mode = T.XDW_OPEN_MODE_EX()
         open_mode.nSize = ctypes.sizeof(open_mode)
         open_mode.nOption = int(mode)

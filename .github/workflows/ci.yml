@@ -30,8 +30,14 @@ jobs:
         run: |
           $env:PYTHONPATH = "$PWD/packages/docuworks-integrations;$PWD/packages/docuworks-ctypes"
           $env:DOCUWORKS_INTEGRATIONS_TEST_TMP = Join-Path $env:RUNNER_TEMP 'corrections-tests'
-          python -m pytest packages/docuworks-integrations/tests/test_corrections.py packages/docuworks-integrations/tests/test_review_xdw.py packages/docuworks-integrations/tests/test_review_xdw_regions.py packages/docuworks-integrations/tests/test_preview.py packages/docuworks-integrations/tests/test_paddle_blank.py packages/docuworks-integrations/tests/test_reviewed.py packages/docuworks-integrations/tests/test_reviewed_jobs.py scripts/tests/test_reviewed_portable.py -p no:cacheprovider
+          python -m pytest packages/docuworks-integrations/tests --ignore=packages/docuworks-integrations/tests/integration scripts/tests/test_reviewed_portable.py -p no:cacheprovider
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Test Core safety and contracts on Python 3.10
+        working-directory: packages/docuworks-ctypes
+        run: >-
+          python -m pytest tests --ignore=tests/integration
+          -k "not installed_bundle_allows_companion_patch_difference" -p no:cacheprovider
 
   dll-free-tests:
     name: DLL-free tests (Python ${{ matrix.python-version }})

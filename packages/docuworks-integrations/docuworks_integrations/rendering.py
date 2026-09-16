@@ -1,5 +1,6 @@
 """One read-only DocuWorks handle for a recognition run."""
 import ctypes
+from ._storage import note
 
 
 class XdwRenderer:
@@ -26,8 +27,7 @@ class XdwRenderer:
         except Exception as close_error:
             if exc is None: raise
             exc._ocr_cleanup_failed = True
-            if hasattr(exc, 'add_note'):
-                exc.add_note('Document close also failed: ' + str(close_error))
+            note(exc, 'Document close also failed: ' + str(close_error))
         return False
 
     def render(self, page, folder, dpi):
