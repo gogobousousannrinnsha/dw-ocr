@@ -672,8 +672,8 @@
     },
     {
       "path": "docs/review-performance-v0.4.1.md",
-      "bytes": 2466,
-      "sha256": "d828ca1c02a837742bf067e0d9b4679944cc0c9b5beb1b5ae89e11e2876445cb"
+      "bytes": 3466,
+      "sha256": "83770b66b6f3a3bc187642f8880f5ad1c6c1dcd4195e149ba15e45c547663106"
     },
     {
       "path": "docs/REVIEW_XDW_0.7.0.md",
@@ -1012,8 +1012,8 @@
     },
     {
       "path": "packages/docuworks-ctypes/MANIFEST.in",
-      "bytes": 70,
-      "sha256": "89ab51b68884783b5f3f094e535b03f7cfc5135949780d2c32cfea1b935e5b9f"
+      "bytes": 107,
+      "sha256": "f5378a17f1a17cbc8929670d4cdd23551eadf9ab46e0df00936f6a13eac076f9"
     },
     {
       "path": "packages/docuworks-ctypes/MIGRATION_0.9_TO_1.0.md",
