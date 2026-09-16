@@ -4,6 +4,10 @@ import json
 import shutil
 from pathlib import Path
 
+from docuworks_ctypes.document import Annotation, Page
+from docuworks_ctypes.errors import XdwError
+from docuworks_ctypes._raw.constants import XDW_E_INVALIDARG
+
 DOC_ATTRIBUTE = b'DW-OCR.SessionDocument'
 PAGE_ATTRIBUTE = b'DW-OCR.SessionPage'
 TEXT_ATTRIBUTE = b'DW-OCR.SessionText'
@@ -11,6 +15,33 @@ TEXT_ATTRIBUTE = b'DW-OCR.SessionText'
 
 def encoded(value):
     return json.dumps(value, ensure_ascii=False, separators=(',', ':'), allow_nan=False).encode('utf-8')
+
+
+class _BlankReviewPage(Page):
+    """Append hint for one exclusively owned blank Review page during creation.
+
+    Keep actual SDK annotation information and all inherited value validation.
+    A hint mismatch disables the shortcut for this page and uses Core's search.
+    Never retain this object across page edits, deletes, or document reopening.
+    """
+
+    def __init__(self, page):
+        super().__init__(page.document, page.number)
+        self._next_index = 1 if self._page_info().nAnnotations == 0 else None
+
+    def _refresh_added_annotation(self, new_handle, *, parent=None):
+        if parent is None and self._next_index is not None:
+            try:
+                info = self._get_annotation_info(None, self._next_index)
+            except XdwError as error:
+                if error.result != XDW_E_INVALIDARG:
+                    raise
+            else:
+                if info.handle == new_handle.value:
+                    self._next_index += 1
+                    return Annotation(self, info)
+        self._next_index = None
+        return super()._refresh_added_annotation(new_handle, parent=parent)
 
 
 class ReviewSdk:
@@ -109,9 +140,10 @@ class ReviewSdk:
                 value = encoded(dict(common, page_id=p['page_id']))
                 check_result(doc.raw.XDW_SetPageUserAttribute(doc.handle, p['page'], PAGE_ATTRIBUTE,
                              value, len(value), None), 'set review page identity')
+                page = _BlankReviewPage(doc.page(p['page'])) if p['items'] else None
                 for source in p['items']:
-                    a = doc.page(p['page']).add_text(PointMM(source['x'], source['y']), source['text'],
-                                                   font_size=12, fore_color=Color.RED)
+                    a = page.add_text(PointMM(source['x'], source['y']), source['text'],
+                                                   font_size=12, fore_color=Color.RED, back_color=Color.NONE)
                     a.set_standard_attribute_raw('%TextDirection', 0)
                     a.set_standard_attribute_raw('%TextOrientation', 0)
                     a.set_standard_attribute('%WordWrap', False)

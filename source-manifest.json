@@ -7,8 +7,8 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "bytes": 7191,
-      "sha256": "c11fad312aa8586423bb5bda28e1214e8efef9561e9a0ccf40e4c3dfe253287f"
+      "bytes": 7253,
+      "sha256": "61dafe28a792cb0d60839ffd5b0f426766c5e579f369761d770b6ca7dcb18d33"
     },
     {
       "path": ".gitignore",
@@ -666,6 +666,11 @@
       "sha256": "eaed8db36323f5298ceb300c8d03a4da44b2a287ad8ed6cbf5478d4176271c19"
     },
     {
+      "path": "docs/review-performance-v0.4.1.md",
+      "bytes": 2263,
+      "sha256": "01a01075f9d2f3c7abbc787f07542143c0e654c6819aabee024015b3e225119a"
+    },
+    {
       "path": "docs/REVIEW_XDW_0.7.0.md",
       "bytes": 149,
       "sha256": "d42ca43232f30301fc1447bff95a9fcf71281fd66e7480d47fda21dca58426f9"
@@ -1188,7 +1193,7 @@
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/__init__.py",
       "bytes": 1834,
-      "sha256": "5f5b2118dbf6ef71805ede8cb926b886924235ade2c65e3b86dd2a465ffe09ab"
+      "sha256": "df6433c18ca44377ef46bd138a9432e5988cab6568344bb32317f2131f7af10d"
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/__main__.py",
@@ -1202,8 +1207,8 @@
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/_reviewed_sdk.py",
-      "bytes": 6989,
-      "sha256": "5dce34a3fd6e818a288f1359950bc55cb91087f6aefac90edcebc4de385ab05f"
+      "bytes": 8373,
+      "sha256": "ccff0f06503fd1d9c7ed5f2c98eb74da30ca53253639f8d51aeb5300cb4d6478"
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/_storage.py",
@@ -1387,8 +1392,8 @@
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/REVIEWED_RESULT_FORMAT.md",
-      "bytes": 10436,
-      "sha256": "51133e59a1b329e3b6d2a968853b3d6648dcc0d8f228716360c220885589a158"
+      "bytes": 11136,
+      "sha256": "b56db18f823d441f0433d59eeef578165779f7f60e07d926e490d9a50972c046"
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/reviewed_types.py",
@@ -1438,17 +1443,17 @@
     {
       "path": "packages/docuworks-integrations/pyproject.toml",
       "bytes": 956,
-      "sha256": "ebc97bbaf3ee7474c545b2dea79565c8b81aeef43742c657601f723b591ad645"
+      "sha256": "42bf1e3090e7de9eb62a424e75ecac356e3ee5312035467762de61fee1ca2e37"
     },
     {
       "path": "packages/docuworks-integrations/README.md",
       "bytes": 2033,
-      "sha256": "bfa2b5c25b69124c48b2ccdbef2db2bce3b4020f1b3a94e3bac084e0822d5e18"
+      "sha256": "11aa02d0ab66fa10ed9c20e1029bdd078391149b24ce66e6d489554bcfe1d541"
     },
     {
       "path": "packages/docuworks-integrations/REVIEWED_RESULT_FORMAT.md",
-      "bytes": 10436,
-      "sha256": "51133e59a1b329e3b6d2a968853b3d6648dcc0d8f228716360c220885589a158"
+      "bytes": 11136,
+      "sha256": "b56db18f823d441f0433d59eeef578165779f7f60e07d926e490d9a50972c046"
     },
     {
       "path": "packages/docuworks-integrations/SETUP_PYTHON313.md",
@@ -1487,8 +1492,8 @@
     },
     {
       "path": "packages/docuworks-integrations/tests/integration/test_reviewed_roundtrip.py",
-      "bytes": 5932,
-      "sha256": "2dbdb10d4c20759d40dd021a4d3411fbf25e1fc51827667c38a734a744fd611b"
+      "bytes": 6546,
+      "sha256": "467f06567ea39c963e04ff1cf8f378d51e98a8000cdfa7f7d117590f9f10e4d5"
     },
     {
       "path": "packages/docuworks-integrations/tests/reviewed_fixture.py",
@@ -1564,6 +1569,11 @@
       "path": "packages/docuworks-integrations/tests/test_reviewed.py",
       "bytes": 11945,
       "sha256": "aaf34a7feb072a12cc141c4f520c78afd963aac7e5329ddd994561b63afd6901"
+    },
+    {
+      "path": "packages/docuworks-integrations/tests/test_reviewed_append.py",
+      "bytes": 3486,
+      "sha256": "68937d6ee6e26d9fa408d983b65b67146838d8910482dd827f67fa82d1d49fe9"
     },
     {
       "path": "packages/docuworks-integrations/tests/test_reviewed_jobs.py",
@@ -1647,13 +1657,13 @@
     },
     {
       "path": "portable/templates/portable-readme.txt",
-      "bytes": 971,
-      "sha256": "1ddb7f445f1bd7ede8c21b856d5c3afb97e65f81f4e43c08cfef8369d1245f79"
+      "bytes": 1096,
+      "sha256": "db6bcecbd7f7b113c8ac02371d076662bf51ee14b4421a221f30260ee6e23aed"
     },
     {
       "path": "portable/templates/public-readme.txt",
-      "bytes": 1156,
-      "sha256": "74998c8b9c3ff0d5b3a5cdda7e56ebae80af06952c80eedf045f153281528fe1"
+      "bytes": 1281,
+      "sha256": "982ab116596f086bd19c312dca6281b587ebf4dec9c93f8616db861a5917f619"
     },
     {
       "path": "portable/text_maps.bat",
@@ -1677,8 +1687,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 1123,
-      "sha256": "a094e1d1a54fdbb3189d27d6601cf68caa926c79d124200f3baf3915a6a3151a"
+      "bytes": 1250,
+      "sha256": "ad9c923ac6764f8a1dcdc06e72d0c6e25fd6da0527eef869ef6f04965cb4318a"
     },
     {
       "path": "requirements/dev.txt",
