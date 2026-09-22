@@ -117,7 +117,8 @@ def annotate_rectangles(run_dir, output_xdw, *, input_xdw=None, dry_run=False,
     if dry_run:
         return payload
     from docuworks_ctypes import Color
-    from docuworks_ctypes.simple import open_xdw
+    from docuworks_ctypes.simple import SimplePage, open_xdw
+    from ._rectangle_sdk import _RectangleAppendPage
     with owned_directory(output.parent, '.rectangles-') as temporary:
         working = temporary/'working.xdw'
         shutil.copyfile(source, working)
@@ -132,6 +133,8 @@ def annotate_rectangles(run_dir, output_xdw, *, input_xdw=None, dry_run=False,
                 page = document.page(n)
                 before[n] = [_snapshot(a) for a in page.annotations()]
                 expected[n] = [i for i in plan['regions'] if i['page'] == n]
+                if expected[n]:
+                    page = SimplePage(_RectangleAppendPage(page.core, len(before[n])))
                 for item in expected[n]:
                     page.rectangle(**item['rectangle_mm'], border_color=Color(COLORS[color]),
                         border_width=1, border_visible=True, fill_visible=False)
