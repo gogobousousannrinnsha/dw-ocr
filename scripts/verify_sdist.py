@@ -53,6 +53,7 @@ def verify(archive, output):
                              'tests/test_paddle_blank.py', 'tests/test_reviewed.py', 'tests/test_reviewed_v2.py',
                              'tests/test_reviewed_jobs.py', 'tests/test_templates.py',
                              'tests/test_template_extract.py', 'tests/test_structured.py', 'tests/test_structured_csv.py',
+                             'tests/test_template_authoring.py', 'tests/test_template_editor.py',
                              '-q', '-p', 'no:cacheprovider',
                              '--junitxml=' + str(output / 'junit.xml')], cwd=source, env=env)
     after = hashes(unpacked)

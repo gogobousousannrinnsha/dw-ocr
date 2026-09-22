@@ -43,6 +43,8 @@ ocr-cache/
 local-data/
 work/
 outputs/
+/templates/
+/template-drafts/
 integration-artifacts/
 # Credentials and machine configuration
 .env

@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXCLUDED = {'.git', 'work', 'local-data', 'models', 'dist', 'build', 'ocr-cache',
-            '__pycache__', '.pytest_cache', 'integration-artifacts'}
+            '__pycache__', '.pytest_cache', 'integration-artifacts', 'template-drafts'}
 ALLOWED = {'.py', '.md', '.toml', '.txt', '.json', '.xml', '.ps1', '.cmd', '.bat', '.ini', '.lock', '.yml', '.yaml'}
 SPECIAL = {'.gitignore', '.gitattributes', 'LICENSE', 'MANIFEST.in'}
 PATTERNS = [
@@ -30,6 +30,7 @@ def source_files():
     files = set(tracked)
     for p in ROOT.rglob('*'):
         rel = p.relative_to(ROOT)
+        if rel.parts[0] == 'templates': continue  # runtime data, not portable/templates README sources
         if any(part in EXCLUDED or part.startswith(('.venv', 'venv')) or part.endswith('.egg-info') for part in rel.parts):
             continue
         if p.is_file():

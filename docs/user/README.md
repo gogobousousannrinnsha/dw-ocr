@@ -1,10 +1,12 @@
 # Portableの利用手順
 
-本書はDW-OCR v0.5.0 Pre-release（Core 1.0.1 / Integrations 0.11.0）の操作手順です。旧版v0.4.1にはテンプレート・CSV機能は含まれません。配布物の確認範囲はReleaseの検証報告を参照してください。
+本書はDW-OCR v0.6.0 Pre-release（Core 1.0.1 / Integrations 0.12.0）の操作手順です。旧版v0.4.1にはテンプレート・CSV機能は含まれません。配布物の確認範囲はReleaseの検証報告を参照してください。
+
+[テンプレート作成画面](template-editor.md)で見本を選び、Viewerで描いた矩形へ項目名・適用条件を設定し、登録・改訂できます。
 
 ## 導入と標準操作
 
-[DW-OCR v0.5.0 Pre-release](https://github.com/gogobousousannrinnsha/dw-ocr/releases/tag/v0.5.0)の配布物を使います。結合ツールと同じ版の全てのtransport ZIPを同じフォルダーに置き、join_parts.batで復元ZIPを作り、新規の短い書込み可能な場所に展開します。部品数はsplit_manifest.jsonに記録されています。取得物・ZIP・展開先には20GB以上とOCR結果分の空きが必要です。旧版は保持します。
+[DW-OCR v0.6.0 Pre-release](https://github.com/gogobousousannrinnsha/dw-ocr/releases/tag/v0.6.0)の配布物を使います。結合ツールと同じ版の全てのtransport ZIPを同じフォルダーに置き、join_parts.batで復元ZIPを作り、新規の短い書込み可能な場所に展開します。部品数はsplit_manifest.jsonに記録されています。取得物・ZIP・展開先には20GB以上とOCR結果分の空きが必要です。旧版は保持します。
 
 Windows x64、対応DocuWorks製品・x64 DLL、NVIDIA GPUと対応ドライバーが必要です。Python 3.13.15、Paddle GPU 3.2.2、PaddleOCR 3.7.0、PaddleX 3.7.2、PP-OCRv6 mediumは同梱構成を使います。CPUへの自動切替はありません。
 
@@ -13,7 +15,7 @@ Windows x64、対応DocuWorks製品・x64 DLL、NVIDIA GPUと対応ドライバ�
 3. 終了画面の保存先を開きます。エラーの詳細はjob.jsonに残ります。
 4. 表示されたreview.xdwをViewerで編集し、保存して閉じます。
 5. 編集済みXDWを「校正結果取込.bat」へドロップします。1文書ずつ取り込み、新しいReviewed ResultとJSONLを保存します。
-6. 同じ帳票向けに用意した矩形テンプレートを登録・適用し、項目ごとの値を保存します。
+6. 「テンプレート作成.bat」で見本から矩形テンプレートを登録します。登録版を適用し、項目ごとの値を保存します。
 7. 同じ登録テンプレートの結果を選び、1文書1レコードのCSVへまとめます。手順は[テンプレートからCSVまで](template-csv.md)を参照してください。
 
 ## 出力と用語

@@ -49,6 +49,13 @@ def test_clean_distributions_pass(tmp_path):
     audit(distributions(tmp_path))
 
 
+@pytest.mark.parametrize('schema', ['docuworks-template-draft', 'docuworks-template-authoring'])
+def test_authoring_data_is_not_publishable(tmp_path, schema):
+    import json
+    with pytest.raises(SystemExit):
+        audit(distributions(tmp_path, data=json.dumps({'schema':schema}).encode()))
+
+
 def test_integrations_sdist_requires_conftest(tmp_path):
     with pytest.raises(SystemExit, match='missing tests/conftest.py'):
         audit(distributions(tmp_path, conftest=False))

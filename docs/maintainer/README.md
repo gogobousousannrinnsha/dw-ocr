@@ -1,12 +1,12 @@
 # 保守・配布
 
-[v0.5.0 Pre-releaseの構成・更新内容・検証方針](RELEASE_v0.5.0.md)（Core 1.0.1 / Integrations 0.11.0）
+[v0.6.0 Pre-releaseの構成・更新内容・検証方針](RELEASE_v0.6.0.md)（Core 1.0.1 / Integrations 0.12.0）
 
 [Reviewed取り込み2.0の受け入れ条件と確認範囲](REVIEWED_IMPORT_V2_ACCEPTANCE.md)（Integrations 0.9.0開発候補）
 
 [v0.4.0の構成・互換性・公開検証条件](RELEASE_v0.4.0.md)
 
-以下の整理・0.8.0.dev1・v0.4.0検証記録は、その時点の履歴です。今回の操作と確認範囲はv0.5.0の構成書とReleaseの最終検証報告を参照してください。
+以下の整理・0.8.0.dev1・v0.4.0検証記録は、その時点の履歴です。今回の操作と確認範囲はv0.6.0の構成書とReleaseの最終検証報告を参照してください。
 
 [今回の整理に対する検証記録](VERIFICATION.md)
 
@@ -38,7 +38,7 @@ Python 3.10～3.13でIntegrationsとCoreのDLL不要試験、配布物の監査�
 python -m pytest packages/docuworks-integrations/tests --ignore=packages/docuworks-integrations/tests/integration -p no:cacheprovider
 python -m pytest scripts/tests -p no:cacheprovider
 python scripts/audit_publication.py
-python scripts/export_public_source.py --repo . --baseline-public <既存公開ソース> --output <新規公開候補> --release-version v0.5.0
+python scripts/export_public_source.py --repo . --baseline-public <既存公開ソース> --output <新規公開候補> --release-version v0.6.0
 python -m build <新規公開候補>/packages/docuworks-integrations --sdist --outdir <新規配布先>
 ```
 
@@ -50,6 +50,6 @@ layout.jsonに宣言した自作ファイルが不足すれば開始前に拒否
 
 ## 記録と公開の境界
 
-今回の配布版はv0.5.0 / Integrations 0.11.0 / Core 1.0.1です。公開前の候補はコミットID・SHA-256・未公開の表示で区別します。過去の0.7.0/v0.3.0整理時の証拠は履歴として保持します。
+今回の配布版はv0.6.0 / Integrations 0.12.0 / Core 1.0.1です。公開前の候補はコミットID・SHA-256・未公開の表示で区別します。過去の0.7.0/v0.3.0整理時の証拠は履歴として保持します。
 
 候補検証、GitHubへのpush・main統合、Release公開は別工程です。公開済みタグ・23添付物・凍結証跡を変更しません。CIの試験・ビルド・監査とartifact保管を区別し、アップロード失敗を試験成功だけで隠しません。過去の容量制限例外を将来の公開へ自動適用しません。

@@ -95,6 +95,9 @@ def _parser() -> argparse.ArgumentParser:
     apply.add_argument('--template-dir', required=True, type=Path)
     apply.add_argument('--reviewed-dir', required=True, type=Path)
     apply.add_argument('--output-dir', required=True, type=Path)
+    editor = subparsers.add_parser('template-editor', help='テンプレート作成画面を開く')
+    editor.add_argument('--app-root', required=True, type=Path,
+                        help='templatesとtemplate-draftsを保存するPortableフォルダー')
     csv_export = subparsers.add_parser('export-structured-csv', help='同じテンプレートの構造化結果をCSVへ出力')
     csv_export.add_argument('--entry', action='append', nargs=2, required=True,
                             metavar=('RESULT_DIR', 'DOCUMENT_NAME'), help='結果フォルダーと文書名。文書ごとに繰り返し指定')
@@ -104,7 +107,7 @@ def _parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
-    if argv and argv[0] in ('register-template', 'check-template', 'apply-template', 'export-structured-csv', '--help', '-h'):
+    if argv and argv[0] in ('template-editor', 'register-template', 'check-template', 'apply-template', 'export-structured-csv', '--help', '-h'):
         # Windows CI/redirection may default to cp1252, which cannot print Japanese.
         # Scope this output contract to the new commands and the shared help text.
         for stream in (sys.stdout, sys.stderr):
@@ -112,6 +115,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 stream.reconfigure(encoding='utf-8')
     parser = _parser()
     args = parser.parse_args(argv)
+    if args.command == 'template-editor':
+        from .template_editor import launch
+        return launch(args.app_root)
     if args.command == 'export-structured-csv':
         from ._structured_csv_cli import run
         return run(args)
