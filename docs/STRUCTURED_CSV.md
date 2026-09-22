@@ -1,5 +1,7 @@
 # Structured ResultのCSV出力
 
+Portable候補での操作順は[テンプレートからCSVまで](user/template-csv.md)を参照してください。
+
 同じ登録テンプレートを使ったStructured Resultを、1文書の結果につき1レコードで
 CSVへまとめます。既存のStructured Result 1.0を読み込み、取得値・診断・結果IDを
 出力します。正本のJSONや元文書を変更せず、DocuWorks・Excel・GPUは不要です。
