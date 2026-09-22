@@ -20,6 +20,9 @@ recognition.ocr_xdw_pages → 元OCR結果（Result 1.1）
 | 1ページの指定領域を編集 | [複数領域レビューAPI](review-regions.md)。1件だけの指定も可能 |
 | 形式1.0の互換レビュー | [単一領域API](review-single.md) |
 | 全ページの白紙Review・独立した校正結果 | [Reviewed Result API](reviewed-result.md) |
+| ID照合中心の取り込み・複数参照・付箋除外 | [Reviewed取り込み2.0](reviewed-import-v2.md) |
+| テンプレートによる取得・独立した構造化結果 | [矩形テンプレート](../RECTANGLE_TEMPLATE.md) |
+| 同じテンプレートの結果を文書ごとのCSVへ出力 | [Structured ResultのCSV出力](../STRUCTURED_CSV.md) |
 | 矩形・確認画像・統合job | [派生出力と文書処理](processing.md) |
 | DocuWorksの一般操作 | [Simple/Core/Rawの選択](core-layers.md)、[Core契約](core.md)、[Simpleの例](simple.md) |
 

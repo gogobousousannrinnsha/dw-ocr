@@ -1,5 +1,7 @@
 # 白紙Reviewと独立した校正結果
 
+Integrations 0.9.0の[ID照合中心の取り込み2.0](reviewed-import-v2.md)は明示的に選択します。以下の1.0のAPIは既定の厳格検証として維持します。
+
 API・保存形式の正本は [Reviewed Result 1.0](../../packages/docuworks-integrations/REVIEWED_RESULT_FORMAT.md) です。
 Portable v0.4.0ではOCR開始.batと校正結果取込.batから実行できます。[利用手順](../user/README.md)を参照してください。
 Canonicalを原記録として保持し、Viewerで保存した現在の文字と位置を別の結果へ取り込みます。

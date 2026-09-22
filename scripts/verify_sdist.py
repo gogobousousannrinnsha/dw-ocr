@@ -50,8 +50,10 @@ def verify(archive, output):
     subprocess.run([sys.executable, '-c', probe, str(source)], cwd=output, env=env, check=True)
     result = subprocess.run([sys.executable, '-m', 'pytest', 'tests/test_corrections.py',
                              'tests/test_review_xdw.py', 'tests/test_review_xdw_regions.py',
-                             'tests/test_paddle_blank.py', 'tests/test_reviewed.py',
-                             'tests/test_reviewed_jobs.py', '-q', '-p', 'no:cacheprovider',
+                             'tests/test_paddle_blank.py', 'tests/test_reviewed.py', 'tests/test_reviewed_v2.py',
+                             'tests/test_reviewed_jobs.py', 'tests/test_templates.py',
+                             'tests/test_template_extract.py', 'tests/test_structured.py', 'tests/test_structured_csv.py',
+                             '-q', '-p', 'no:cacheprovider',
                              '--junitxml=' + str(output / 'junit.xml')], cwd=source, env=env)
     after = hashes(unpacked)
     added = set(after) - set(before)

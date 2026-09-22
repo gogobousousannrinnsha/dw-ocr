@@ -66,11 +66,30 @@ class ReviewSdk:
             raise RuntimeError('review attribute changed while reading')
         return bytes(buffer)
 
-    def inspect(self, path):
+    @staticmethod
+    def _sticky_subtrees(annotation):
+        """Count excluded stickies, rejecting text nested outside their ownership."""
+        from docuworks_ctypes import AnnotationType
+        pending = [(annotation, True, False)]
+        count = 0
+        while pending:
+            current, direct, in_sticky = pending.pop()
+            if current.annotation_type == AnnotationType.STICKY:
+                count += 1
+                in_sticky = True
+            if current.annotation_type == AnnotationType.TEXT and not direct and not in_sticky:
+                raise ValueError('nested text outside a sticky annotation is unsupported')
+            pending.extend((child, False, in_sticky) for child in
+                           current.page._children(current.handle, current._info.nChildAnnotations))
+        return count
+
+    def inspect(self, path, *, exclude_sticky=False):
         from docuworks_ctypes import AnnotationType
         from docuworks_ctypes._raw import types as T
         from docuworks_ctypes.errors import check_result
         result = {'pages': []}
+        if exclude_sticky:
+            result['excluded_sticky_count'] = 0
         with self.api.open_document(path) as doc:
             result['identity'] = self.attribute(doc.raw.XDW_GetUserAttribute, doc.handle, DOC_ATTRIBUTE)
             for n in range(1, doc.page_count + 1):
@@ -83,9 +102,12 @@ class ReviewSdk:
                               rotation=info.nDegree, identity=self.attribute(doc.raw.XDW_GetPageUserAttribute,
                               doc.handle, n, PAGE_ATTRIBUTE), items=[])
                 for annotation in page.annotations(recursive=False):
-                    for child in annotation.descendants():
-                        if child.annotation_type == AnnotationType.TEXT:
-                            raise ValueError(f'page {n}: nested text in a group/sticky annotation is unsupported')
+                    if exclude_sticky:
+                        result['excluded_sticky_count'] += self._sticky_subtrees(annotation)
+                    else:
+                        for child in annotation.descendants():
+                            if child.annotation_type == AnnotationType.TEXT:
+                                raise ValueError(f'page {n}: nested text in a group/sticky annotation is unsupported')
                     if annotation.annotation_type != AnnotationType.TEXT:
                         continue
                     a = annotation._info
@@ -102,6 +124,16 @@ class ReviewSdk:
                                                 annotation.handle, TEXT_ATTRIBUTE)))
                 result['pages'].append(record)
         return result
+
+    def set_origins(self, path, updates):
+        """Modify only explicit direct-text attributes on an exclusively owned copy."""
+        from docuworks_ctypes import AnnotationType, OpenMode
+        with self.api.open_document(path, mode=OpenMode.UPDATE) as doc:
+            for update in updates:
+                items = [a for a in doc.page(update['page']).annotations(recursive=False)
+                         if a.annotation_type == AnnotationType.TEXT]
+                items[update['order'] - 1].set_user_attribute(TEXT_ATTRIBUTE.decode('ascii'), update['raw'])
+            doc.save()
 
     def source_pages(self, path):
         with self.api.open_document(path) as doc:
