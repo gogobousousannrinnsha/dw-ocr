@@ -1,7 +1,7 @@
 {
   "schema": "dw-ocr-portable-layout",
   "schema_version": "1.0",
-  "provenance": "Existing v0.3.0 launchers imported from the verified public Portable; no new launch behavior.",
+  "provenance": "Launchers originate from verified v0.3.0 and are source-managed here. Current sources include Reviewed import 2.0; template and CSV commands use the existing docuworks-integrations.bat entrypoint.",
   "files": [
     "OCR開始.bat",
     "校正結果取込.bat",

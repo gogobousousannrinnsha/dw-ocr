@@ -1,19 +1,19 @@
-# DocuWorks OCR
+# DW-OCR v0.5.0
 
-このmainブランチは、Core **1.0.1** / Integrations **0.11.0** を含む次期公開版のソースです。公開済みの[DW-OCR v0.4.1 Pre-release](https://github.com/gogobousousannrinnsha/dw-ocr/releases/tag/v0.4.1)（Integrations 0.8.1）へ、新しいReviewed取り込み規則、矩形テンプレートによる項目取得、構造化結果のCSV出力、矩形生成の速度改善を追加しています。これらの変更を含むPortableはまだ公開していません。
+Core 1.0.1 / Integrations 0.11.0。Windows x64用Pre-releaseです。
 
-XDWをOCRし、Canonical原記録・白紙Review・矩形付きXDW・確認画像を生成します。Viewerで保存した文字と位置は、別のReviewed ResultとJSONLへ取り込みます。原記録を変更せず、既存CorrectionSet APIも維持します。
+- [利用者向け操作・設定・保存先](docs/user/README.md)
+- [矩形テンプレートからCSV一覧まで](docs/user/template-csv.md)
+- [Python API・結果形式・訂正](docs/api/README.md)
+- [保守・配布と構成管理](docs/maintainer/README.md)
+- [履歴・公開済み基準・検証](docs/history/README.md)
 
-- [利用者向け：操作・設定・保存先](docs/user/README.md)
-- [Python API：結果形式・訂正・XDW](docs/api/README.md)
-- [ID照合中心の取り込み2.0・複数参照のAPI](docs/api/reviewed-import-v2.md)
-- [矩形テンプレートによる項目取得](docs/RECTANGLE_TEMPLATE.md)
-- [構造化結果のCSV出力](docs/STRUCTURED_CSV.md)
-- [保守担当：構造・試験・配布](docs/maintainer/README.md)
-- [履歴・検証・公開済み基準](docs/history/README.md)
+OCR開始.batは全ページOCR・白紙Review・矩形付きXDW・確認画像と任意の元OCR JSONLを生成します。Viewerでreview.xdwを編集・保存して閉じ、校正結果取込.batへドロップすると独立したReviewed ResultとJSONLを保存します。取り込みは1文書ずつです。
 
-ソース中の校正結果取込BATはidentityモードを使用し、付箋の作業メモを本文から除外します。APIの既定値は従来のstrictモードです。テンプレート登録・確認・適用・CSV出力はCLI/APIで利用します。全体の入口は[文書案内](docs/README.md)です。
+1つのXDWに複数の矩形を配置して項目名・適用条件を設定し、テンプレートとして登録できます。校正後の文字と位置から項目を取得し、Structured Resultへ保存して、同じ登録テンプレートの結果を1文書1レコードのCSVへまとめます。登録・確認・適用・CSV出力はdocuworks-integrations.batから実行します。
 
-Viewerの基本編集は利用者確認済みです。その他の編集操作はSDKで代替検証しており、Viewerの全ケース目視確認が完了したとは扱いません。新機能の確認範囲は各機能の仕様・検証文書を参照してください。
+新しい取り込み・テンプレートのSDK試験は合成文書を使った確認です。今回のViewer手操作・Excel画面・実帳票・DocuWorks 9.1は未確認です。[構成と検証方針](docs/maintainer/RELEASE_v0.5.0.md)と、Releaseに添付する最終検証報告を参照してください。旧版は保持し、新しいフォルダーへ展開してください。
 
 自作部分はMIT、第三者資産は各条件を維持します。SDK・DLL・実文書は同梱しません。[ライセンス](LICENSE) ／ [第三者条件](THIRD_PARTY_NOTICES.md)
+
+確認用XDWの文字背景は塗りつぶしなしです。新規白紙Reviewの追加処理に加え、矩形生成時のページ情報の再取得を減らしています。

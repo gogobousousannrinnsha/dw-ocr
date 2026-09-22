@@ -1,10 +1,12 @@
 # 保守・配布
 
+[v0.5.0 Pre-releaseの構成・更新内容・検証方針](RELEASE_v0.5.0.md)（Core 1.0.1 / Integrations 0.11.0）
+
 [Reviewed取り込み2.0の受け入れ条件と確認範囲](REVIEWED_IMPORT_V2_ACCEPTANCE.md)（Integrations 0.9.0開発候補）
 
 [v0.4.0の構成・互換性・公開検証条件](RELEASE_v0.4.0.md)
 
-以下の整理・0.8.0.dev1検証記録は、その時点の履歴です。現行のBAT接続と公開条件は上記を参照してください。
+以下の整理・0.8.0.dev1・v0.4.0検証記録は、その時点の履歴です。今回の操作と確認範囲はv0.5.0の構成書とReleaseの最終検証報告を参照してください。
 
 [今回の整理に対する検証記録](VERIFICATION.md)
 
@@ -30,13 +32,13 @@
 
 ## ローカル検証と候補作成
 
-Python 3.11〜3.13でIntegrations回帰、3.10で訂正・レビューと変更した共通部品を検証します。SDK・GPUはPython 3.13で別途実行します。Coreの既知Python 3.10二重例外を修正・全体検証したとは扱いません。
+Python 3.10～3.13でIntegrationsとCoreのDLL不要試験、配布物の監査を行います。SDK・GPUはPython 3.13で別途実行します。Core 1.0.1での例外保持などの修正と確認範囲は[対応台帳](CORE_1.0.1_ISSUES.md)を参照してください。
 
 ```powershell
 python -m pytest packages/docuworks-integrations/tests --ignore=packages/docuworks-integrations/tests/integration -p no:cacheprovider
 python -m pytest scripts/tests -p no:cacheprovider
 python scripts/audit_publication.py
-python scripts/export_public_source.py --repo . --baseline-public <既存公開ソース> --output <新規公開候補>
+python scripts/export_public_source.py --repo . --baseline-public <既存公開ソース> --output <新規公開候補> --release-version v0.5.0
 python -m build <新規公開候補>/packages/docuworks-integrations --sdist --outdir <新規配布先>
 ```
 
@@ -48,6 +50,6 @@ layout.jsonに宣言した自作ファイルが不足すれば開始前に拒否
 
 ## 記録と公開の境界
 
-今回は0.7.0/v0.3.0の版番号を維持した整理候補です。既存Releaseと同じバイト列という意味ではありません。候補はコミットID・SHA-256・未公開の表示で区別します。現行機能の追加・公開API変更は別の版計画とします。
+今回の配布版はv0.5.0 / Integrations 0.11.0 / Core 1.0.1です。公開前の候補はコミットID・SHA-256・未公開の表示で区別します。過去の0.7.0/v0.3.0整理時の証拠は履歴として保持します。
 
 候補検証、GitHubへのpush・main統合、Release公開は別工程です。公開済みタグ・23添付物・凍結証跡を変更しません。CIの試験・ビルド・監査とartifact保管を区別し、アップロード失敗を試験成功だけで隠しません。過去の容量制限例外を将来の公開へ自動適用しません。

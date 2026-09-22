@@ -577,13 +577,18 @@
     },
     {
       "path": "docs/maintainer/README.md",
-      "bytes": 4647,
-      "sha256": "b21cf58d4fabd9f93a3b3222a71f3ef440401189ef2680e99ccf716236c55f8f"
+      "bytes": 4801,
+      "sha256": "037933bfff85803b2ac3eafdd272091046ad7f8ec7be92cca03813159107a184"
     },
     {
       "path": "docs/maintainer/RELEASE_v0.4.0.md",
       "bytes": 2974,
       "sha256": "e5c179ad6567dfda530df9fc968fd6a802388a679bc3c66fb53c6e0586fce532"
+    },
+    {
+      "path": "docs/maintainer/RELEASE_v0.5.0.md",
+      "bytes": 6939,
+      "sha256": "696c6898962dd0c73b2cf98fc08fd4dbd52ff2a28c2c8b6fa6b1047f3f19c8ca"
     },
     {
       "path": "docs/maintainer/reviewed-result-evidence.json",
@@ -627,13 +632,13 @@
     },
     {
       "path": "docs/README.md",
-      "bytes": 1063,
-      "sha256": "c2c454384373739697169cca3391434bd21eed6457898c2cac96d686f2a24bcc"
+      "bytes": 1324,
+      "sha256": "820c7c321442d92c8a810a2eb66729cfea411bc104cdcc07f5481b19fce9da37"
     },
     {
       "path": "docs/RECTANGLE_TEMPLATE.md",
-      "bytes": 8113,
-      "sha256": "d62b396e1325ae20523e02dbb0b3c864a3864041cdb9ecdd763143f1849812b6"
+      "bytes": 8236,
+      "sha256": "f77c74689bf07d001644aea11a16e026d3ca642a13bc5472539c69d169cb462a"
     },
     {
       "path": "docs/RECTANGLE_TEMPLATE_VERIFICATION.md",
@@ -742,8 +747,8 @@
     },
     {
       "path": "docs/STRUCTURED_CSV.md",
-      "bytes": 6532,
-      "sha256": "3e7e1d8de76f8225a39f23e6a5ae692535e7fb625829a2ef05e48bc0836ca763"
+      "bytes": 6655,
+      "sha256": "a13cfc3948980619c2c541de544a04a7337cad835395612a5c06dad260dfce08"
     },
     {
       "path": "docs/STRUCTURED_CSV_VERIFICATION.md",
@@ -757,8 +762,13 @@
     },
     {
       "path": "docs/user/README.md",
-      "bytes": 7602,
-      "sha256": "89f445eb4e08b342fb8fd7b34ab675b2079ef7a48dbfa2098b1a6b247fd8d74f"
+      "bytes": 8462,
+      "sha256": "0b9d9a62914724b5824924204f94b41701e9909ddb13a8ff064074bb542a1d0c"
+    },
+    {
+      "path": "docs/user/template-csv.md",
+      "bytes": 7285,
+      "sha256": "725523ab457c9bcb9b38f597eca26d3e4982ec157b7a52279e1a61486e80d057"
     },
     {
       "path": "docs/VERIFICATION.md",
@@ -1593,7 +1603,7 @@
     {
       "path": "packages/docuworks-integrations/README.md",
       "bytes": 2617,
-      "sha256": "94e1cd89dda76af58590264687b4b55e0e73c956ddc13d1a57028cc5e93e1748"
+      "sha256": "28e2d4982c7df610304cd49b733e2069c4750d068b29c6a184d00018b017f24b"
     },
     {
       "path": "packages/docuworks-integrations/REVIEWED_RESULT_FORMAT.md",
@@ -1787,8 +1797,8 @@
     },
     {
       "path": "portable/layout.json",
-      "bytes": 779,
-      "sha256": "a81df41a58a74a06045ab8d68010d1932fa3db08ea22ad480bd7c675b6260dbb"
+      "bytes": 882,
+      "sha256": "3f04202668b8fd6f5704bf7c0e19c45ba01f86f9523358ece8890538edd11bc6"
     },
     {
       "path": "portable/ocr_rectangles.bat",
@@ -1847,13 +1857,13 @@
     },
     {
       "path": "portable/templates/portable-readme.txt",
-      "bytes": 1485,
-      "sha256": "f63f46019b9e45e50e4ec2f90c070df21dd3583bbd9eb83c0ca7a841e5c74080"
+      "bytes": 1998,
+      "sha256": "db49f8ab3d032984966ec437f98a244be8c9370a95b4c3786493fbd47b2b98ec"
     },
     {
       "path": "portable/templates/public-readme.txt",
-      "bytes": 1281,
-      "sha256": "982ab116596f086bd19c312dca6281b587ebf4dec9c93f8616db861a5917f619"
+      "bytes": 1945,
+      "sha256": "4e936abce51d10e2368120a476f7be82026d592aa873ff83074685d35f2063d0"
     },
     {
       "path": "portable/text_maps.bat",
@@ -1877,8 +1887,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 2067,
-      "sha256": "165fc4b3769da063b8313470aaad38b3909968ac051067ca8eeb4dfb16899117"
+      "bytes": 1915,
+      "sha256": "2f82d93619d07b7b58170c8737c7f5ecc6773713bbc872c80cbd84cba04623a4"
     },
     {
       "path": "requirements/dev.txt",
