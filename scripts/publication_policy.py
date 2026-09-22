@@ -9,7 +9,7 @@ TEXT_SUFFIXES = {'.py', '.pyi', '.md', '.rst', '.toml', '.txt', '.json', '.xml',
                  '.ps1', '.cmd', '.bat', '.ini', '.lock', '.yml', '.yaml', '.cfg', '.ini', '.typed'}
 METADATA_NAMES = {'METADATA', 'WHEEL', 'RECORD', 'PKG-INFO', 'LICENSE', 'COPYING',
                   'NOTICE', '.gitignore', '.gitattributes', 'MANIFEST.in'}
-PRIVATE_DIRS = {'sdk', 'models', 'local-data', 'ocr-cache', '.git', '.ssh', '.aws'}
+PRIVATE_DIRS = {'sdk', 'models', 'local-data', 'ocr-cache', '.git', '.ssh', '.aws', 'template-drafts', 'sample-reviewed'}
 SECRET_FIELDS = {'password', 'passwd', 'api_key', 'apikey', 'client_secret',
                  'access_token', 'refresh_token', 'secret_access_key'}
 SECRET_PATTERNS = [
@@ -67,7 +67,8 @@ def content_error(data):
                                      'docuworks-ocr-corrections', 'docuworks-ocr-effective-region',
                                      'docuworks-ocr-review', 'docuworks-ocr-review-identity',
                                      'docuworks-review-session', 'docuworks-review-session-identity',
-                                     'docuworks-reviewed-result', 'docuworks-reviewed-text'):
+                                     'docuworks-reviewed-result', 'docuworks-reviewed-text',
+                                     'docuworks-template-draft', 'docuworks-template-authoring'):
             return 'OCR run manifest'
         raw = payload.get('res', payload)
         if isinstance(raw, dict) and {'rec_texts', 'rec_polys'} <= raw.keys():

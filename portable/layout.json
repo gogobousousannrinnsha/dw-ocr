@@ -5,6 +5,7 @@
   "files": [
     "OCR開始.bat",
     "校正結果取込.bat",
+    "テンプレート作成.bat",
     "docuworks-integrations.bat",
     "ocr_rectangles.bat",
     "ocr_xdw.bat",

@@ -73,6 +73,19 @@ def test_export_uses_managed_launchers_not_public_baseline(tmp_path):
     assert (tmp_path/'export/portable/ocr_rectangles.bat').read_bytes()==bat
 
 
+def test_portable_does_not_inherit_user_templates_or_drafts(tmp_path):
+    repo,_,wheels,baseline,_ = setup_case(tmp_path)
+    with zipfile.ZipFile(baseline,'a') as z:
+        z.writestr('templates/private/v001/authoring/sample-reviewed/reviewed.json', b'private sample')
+        z.writestr('template-drafts/private/draft.json', b'private draft')
+    output = tmp_path/'fresh.zip'
+    build(baseline,digest(baseline),wheels,repo/'portable',output,source=repo)
+    with zipfile.ZipFile(output) as z:
+        assert {name for name in z.namelist() if name.startswith(('templates/','template-drafts/'))} == {
+            'templates/','template-drafts/'}
+        assert 'テンプレート作成.bat' in z.namelist()
+
+
 def test_public_links_and_machine_evidence(tmp_path):
     repo,public,_,_,_=setup_case(tmp_path)
     package=repo/'packages/docuworks-integrations'

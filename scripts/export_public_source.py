@@ -32,14 +32,16 @@ def export(repo, baseline_public, output, *, release_version='v0.3.0'):
         source=repo/'packages'/name
         destination=output/'packages'/name
         shutil.copytree(source,destination,ignore=shutil.ignore_patterns(
-            '__pycache__','*.pyc','*.egg-info','build','dist','.pytest_cache','integration-artifacts'))
+            '__pycache__','*.pyc','*.egg-info','build','dist','.pytest_cache','integration-artifacts',
+            'template-drafts','sample-reviewed'))
         metadata=destination/'pyproject.toml'
         text=metadata.read_text(encoding='utf-8').replace('license = {text = "Proprietary"}',
                                                         'license = {text = "MIT"}')
         metadata.write_text(text,encoding='utf-8')
         shutil.copyfile(baseline_public/'LICENSE',destination/'LICENSE')
     for folder in ('portable','requirements','docs','examples','scripts'):
-        shutil.copytree(repo/folder,output/folder,dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__','*.pyc'))
+        shutil.copytree(repo/folder,output/folder,dirs_exist_ok=True,ignore=shutil.ignore_patterns(
+            '__pycache__','*.pyc','template-drafts','sample-reviewed'))
     if (repo/'.github').is_dir():
         shutil.copytree(repo/'.github',output/'.github')
     for name in ('.gitattributes','.gitignore'):

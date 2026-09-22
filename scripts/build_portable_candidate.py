@@ -89,7 +89,7 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
         f"\nCore {versions['docuworks-ctypes']}; Integrations {version}; Python 3.13.15\n"+
         '\n'.join(w.name+' SHA256 '+digest(w) for w in wheel_paths)+'\n').encode()
     changes['reference/project-wheels.json']=json.dumps({w.name:digest(w) for w in wheel_paths},indent=2).encode()
-    for folder in ('INPUT','OUTPUT','runs','cache'): changes[folder+'/']=b''
+    for folder in ('INPUT','OUTPUT','runs','cache','templates','template-drafts'): changes[folder+'/']=b''
     origins.update({name:'generated' for name in changes if name not in origins})
     inventory_name='reference/distribution-files.json'
     removed=[]
@@ -101,6 +101,7 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
         for name in original.namelist():
             lower=name.lower()
             if ('__pycache__' in lower or lower.endswith('.pyc') or
+                lower.startswith(('templates/','template-drafts/')) or
                 lower.startswith(('wheelhouse/','runtime/lib/site-packages/docuworks_integrations',
                                   'runtime/lib/site-packages/docuworks_ctypes')) or
                 lower.startswith(('docs/','examples/','packages/','requirements/','scripts/')) or

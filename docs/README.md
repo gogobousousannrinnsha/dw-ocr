@@ -5,6 +5,7 @@
 | 読む人・目的 | 入口 | 内容 |
 |---|---|---|
 | Portable利用者 | [利用手順](user/README.md) | 標準操作、設定、結果、制約 |
+| テンプレートの準備 | [作成画面](user/template-editor.md) | 作成・再開・見本付き改訂 |
 | 項目取得とCSV一覧 | [テンプレートからCSVまで](user/template-csv.md) | 矩形への項目設定、登録、取得、CSV保存 |
 | Python開発者 | [API案内](api/README.md) | 入出力、形式、例外、互換性 |
 | 保守・配布担当 | [保守手順](maintainer/README.md) | モジュール、管理元、試験、候補作成 |
@@ -13,4 +14,4 @@
 
 現行仕様は上記の利用手順・API仕様を正とします。履歴にある「未実装」「未確認」「承認待ち」はその記録時点の状態です。旧URLの案内ページから過去の内容も参照できます。
 
-配布構成と確認範囲は[v0.5.0 Pre-release](maintainer/RELEASE_v0.5.0.md)を参照してください。
+配布構成と確認範囲は[v0.6.0 Pre-release](maintainer/RELEASE_v0.6.0.md)を参照してください。
