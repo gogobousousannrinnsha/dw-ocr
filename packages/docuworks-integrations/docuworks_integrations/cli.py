@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sys
 from typing import Sequence
 
 
@@ -82,12 +83,41 @@ def _parser() -> argparse.ArgumentParser:
     process.add_argument('--model-root', required=True, type=Path)
     process.add_argument('--settings', type=Path)
     process.add_argument('--dll-path', type=Path)
+    register = subparsers.add_parser('register-template', help='矩形XDWをテンプレートとして登録')
+    register.add_argument('--template-xdw', required=True, type=Path)
+    register.add_argument('--output-dir', required=True, type=Path)
+    register.add_argument('--name')
+    register.add_argument('--dll-path', type=Path)
+    check = subparsers.add_parser('check-template', help='登録内容と適用結果を保存せず確認')
+    check.add_argument('--template-dir', required=True, type=Path)
+    check.add_argument('--reviewed-dir', type=Path)
+    apply = subparsers.add_parser('apply-template', help='テンプレートを適用して構造化結果を保存')
+    apply.add_argument('--template-dir', required=True, type=Path)
+    apply.add_argument('--reviewed-dir', required=True, type=Path)
+    apply.add_argument('--output-dir', required=True, type=Path)
+    csv_export = subparsers.add_parser('export-structured-csv', help='同じテンプレートの構造化結果をCSVへ出力')
+    csv_export.add_argument('--entry', action='append', nargs=2, required=True,
+                            metavar=('RESULT_DIR', 'DOCUMENT_NAME'), help='結果フォルダーと文書名。文書ごとに繰り返し指定')
+    csv_export.add_argument('--output', required=True, type=Path)
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] in ('register-template', 'check-template', 'apply-template', 'export-structured-csv', '--help', '-h'):
+        # Windows CI/redirection may default to cp1252, which cannot print Japanese.
+        # Scope this output contract to the new commands and the shared help text.
+        for stream in (sys.stdout, sys.stderr):
+            if hasattr(stream, 'reconfigure') and not stream.isatty():
+                stream.reconfigure(encoding='utf-8')
     parser = _parser()
     args = parser.parse_args(argv)
+    if args.command == 'export-structured-csv':
+        from ._structured_csv_cli import run
+        return run(args)
+    if args.command in ('register-template', 'check-template', 'apply-template'):
+        from ._template_cli import run
+        return run(args)
     if args.command in ('annotate-rectangles','render-text-maps','process-documents'):
         values = vars(args).copy(); command = values.pop('command')
         if command == 'annotate-rectangles':
@@ -105,7 +135,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         return payload.get('exit_code',0)
     if args.command == "ocr-folder":
         from .batch import ocr_folder
-        import sys
         try:
             result = ocr_folder(args.input_dir, args.batch_dir, args.model_root,
                 recursive=args.recursive, dpi=args.dpi, dll_path=args.dll_path)

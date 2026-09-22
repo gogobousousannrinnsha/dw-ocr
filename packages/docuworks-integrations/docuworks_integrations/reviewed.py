@@ -71,8 +71,8 @@ def _timestamp(value):
         raise ValueError('timestamp must include timezone')
 
 
-def _header(data, schema):
-    if data['schema'] != schema or data['schema_version'] != VERSION:
+def _header(data, schema, version=VERSION):
+    if data['schema'] != schema or data['schema_version'] != version:
         raise ValueError('unsupported reviewed schema/version')
 
 
@@ -86,7 +86,7 @@ def _plain_path(path):
 
 def _published(root):
     root = _plain_path(root)
-    if root.name.startswith(('.review-session-', '.review-result-', '.review-export-')):
+    if root.name.startswith(('.review-session-', '.review-result-', '.review-export-', '.review-origins-', '.rectangle-template-', '.structured-result-', '.structured-csv-')):
         raise ValueError('unpublished review staging directory')
     return root
 
@@ -105,7 +105,7 @@ def _destination(path, *protected):
         marker = parent / 'manifest.json'
         if marker.is_file():
             manifest = _read(marker)
-            if isinstance(manifest, dict) and manifest.get('schema') in ('docuworks-ocr-result', SESSION_SCHEMA, RESULT_SCHEMA):
+            if isinstance(manifest, dict) and manifest.get('schema') in ('docuworks-ocr-result', SESSION_SCHEMA, RESULT_SCHEMA, 'docuworks-rectangle-template', 'docuworks-structured-result'):
                 raise ValueError('output must be outside saved result bundles')
     return path
 
@@ -115,10 +115,10 @@ def _read(path):
     return read_json(path)
 
 
-def _manifest(root, schema, expected):
+def _manifest(root, schema, expected, version=VERSION):
     data = _read(root / 'manifest.json')
     _keys(data, 'schema schema_version status files')
-    _header(data, schema)
+    _header(data, schema, version)
     if data['status'] != 'COMPLETE' or not isinstance(data['files'], dict) or set(data['files']) != expected:
         raise ValueError('incomplete reviewed bundle')
     for name, digest in data['files'].items():
@@ -128,8 +128,8 @@ def _manifest(root, schema, expected):
     return data
 
 
-def _write_manifest(root, schema, names):
-    (root / 'manifest.json').write_bytes(_bytes(dict(schema=schema, schema_version=VERSION,
+def _write_manifest(root, schema, names, version=VERSION):
+    (root / 'manifest.json').write_bytes(_bytes(dict(schema=schema, schema_version=version,
         status='COMPLETE', files={name: sha256(root / name) for name in sorted(names)})))
 
 
@@ -290,7 +290,7 @@ def _decode(value):
             return result
         data = json.loads(value, object_pairs_hook=pairs)
         return data if isinstance(data, dict) else None
-    except (ValueError, UnicodeError):
+    except (ValueError, UnicodeError, RecursionError):
         return None
 
 
@@ -386,6 +386,9 @@ def _origin(raw, identity, identity_hash):
 
 
 def _jsonl(data):
+    if data.get('schema_version') == '2.0':
+        from ._reviewed_v2 import jsonl
+        return jsonl(data)
     rows = []
     for p in data['pages']:
         for item in p['items']:
@@ -437,6 +440,10 @@ def _validate_result(data, identity, session, identity_hash):
 
 
 def _load_result(root):
+    header = _read(root / 'manifest.json')
+    if isinstance(header, dict) and header.get('schema_version') == '2.0':
+        from ._reviewed_v2 import load_result
+        return load_result(root)
     manifest_hash = sha256(root / 'manifest.json')
     manifest = _manifest(root, RESULT_SCHEMA, RESULT_FILES)
     identity = _identity(_read(root / 'identity.json'))
@@ -459,8 +466,14 @@ def load_reviewed_result(result_dir) -> ReviewedResult:
     return _load_result(_published(result_dir))
 
 
-def import_reviewed_result(session_dir, edited_xdw, output_dir, *, dll_path=None) -> ReviewedResult:
-    """Import all direct text annotations and publish one new, complete document snapshot."""
+def import_reviewed_result(session_dir, edited_xdw, output_dir, *, dll_path=None,
+                           validation_mode='strict') -> ReviewedResult:
+    """Import one snapshot: legacy strict/1.0 (default), or identity/2.0."""
+    if validation_mode == 'identity':
+        from ._reviewed_v2 import import_result
+        return import_result(session_dir, edited_xdw, output_dir, dll_path=dll_path)
+    if validation_mode != 'strict':
+        raise ValueError('validation_mode must be strict or identity')
     session = load_review_session(session_dir)
     edited = _plain_path(edited_xdw)
     if edited == session.root / 'initial.xdw':
@@ -505,6 +518,27 @@ def import_reviewed_result(session_dir, edited_xdw, output_dir, *, dll_path=None
             raise RuntimeError('review inputs changed during import')
         publish_new(staging, output)
     return load_reviewed_result(output)
+
+
+def get_reviewed_origins(item):
+    """Return valid region IDs from a validated 1.0 or 2.0 item; keep result context."""
+    if 'origins' in item:
+        return tuple(reference['region_id'] for reference in item['origins'])
+    origin = item['origin']
+    return (origin['region_id'],) if origin['status'] in ('matched', 'duplicate') else ()
+
+
+def set_review_origins(session_dir, edited_xdw, output_xdw, assignments, *,
+                       expected_source_sha256, dll_path=None):
+    """Assign explicit region IDs to current page/text-order locators in a new XDW.
+
+    assignments: [{'page': 1, 'order': 1, 'region_ids': ['p0001-r000001']}].
+    The expected input hash prevents applying locators to a subsequently edited file.
+    No source or existing bundle is overwritten.
+    """
+    from ._reviewed_v2 import set_origins
+    return set_origins(session_dir, edited_xdw, output_xdw, assignments,
+                       expected_source_sha256=expected_source_sha256, dll_path=dll_path)
 
 
 def export_reviewed_jsonl(result: ReviewedResult, output_path) -> Path:

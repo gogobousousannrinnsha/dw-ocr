@@ -137,3 +137,17 @@ Viewer操作の人間による確認とSDK自動照合は別記録です。実�
 文字・識別属性・保存後の全検査とReview Session / Reviewed Result 1.0の形式は維持します。
 
 Core 1.0.1以降を使用します。Review Session / Reviewed Resultの保存形式1.0は変更しません。
+
+## 追加仕様: ID照合中心の取り込み2.0（Integrations 0.9.0）
+
+この節より前は従来の1.0契約です。import_reviewed_resultのvalidation_modeは既定strictで、1.0を保存します。identityを明示すると新形式2.0を保存し、Sessionとのページ数・順序・寸法・回転・ページ識別の照合を行いません。文書のreview_idとidentity_sha256、および固定ファイルのハッシュ検証は維持します。保存済みXDWの全ページと実測寸法・回転を記録し、validation={mode: identity, identity_checked: true, page_structure_checked: false}をJSONとJSONLへ持たせます。page_idは結果内の識別子です。ページ構造変更は運用対象外です。
+
+2.0のReviewed JSON・JSONL・manifestと、明示設定用docuworks-review-origins属性は版2.0です。Session・identity・そのmanifestは1.0のままです。文書属性DW-OCR.SessionDocumentも維持します。テキスト属性DW-OCR.SessionTextは既存の単一参照と新しい複数参照の両方を解釈します。4つの2.0 JSON Schemaを同梱します。
+
+項目のoriginsは{run_id, canonical_manifest_sha256, region_id}の配列です。同じ領域を複数項目が参照でき、空配列は正常です。参照はregion_id順で重複を除去します。自動推定は行いません。origin_evidenceはstatus（none / matched / partial / invalid / foreign）、raw_base64、issues（0始まりindexまたはnullとreason）を保持します。不正部分は原本参照へ使わず、本文・有効部分・元情報を残します。不正時はORIGIN_PARTIAL / ORIGIN_INVALID / ORIGIN_FOREIGNを診断に記録し、参照なしとは区別します。get_reviewed_origins(item)は検証済み旧・新項目の有効なregion_idをタプルで返し、元の診断・証拠は項目に残ります。
+
+付箋本体とその子孫のテキストは本文から除外し、excluded_sticky_countで付箋数を記録します。固定XDWコピーにはメモが残ります。通常テキストが付箋と視覚的に重なっても保持します。付箋以外の未対応構造内のテキストは文書単位で拒否します。空文字・空白だけの本文も保持してEMPTY_TEXTを記録し、全本文0件でも成功します。SDK読取失敗を空文字に変換しません。
+
+set_review_origins(session_dir, edited_xdw, output_xdw, assignments, *, expected_source_sha256, dll_path=None)は新規XDWコピーへ複数参照を明示設定します。assignmentsは{page, order, region_ids}のリストで、pageは1始まりのページ番号、orderはページ直下の通常テキストだけの1始まり順序です。同じXDWの取り込み結果のpage/orderとsource_xdw_sha256を使います。入力が変わっていれば拒否し、Sessionに実在する領域だけを設定します。空のregion_idsも有効です。保存・再読込で変更対象の属性と本文・配置の一致を検証し、元データ・Session固定ファイル・完成済み結果を変更しません。
+
+load_reviewed_resultはmanifestの版に応じて旧・新契約を選択します。新形式の再読込で旧ページ検証を再適用しません。JSONLはJSONから生成し一致を検証します。旧結果を自動変換せず、取り込みは毎回新しい結果を作ります。

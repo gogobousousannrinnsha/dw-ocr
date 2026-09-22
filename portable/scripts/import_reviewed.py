@@ -36,10 +36,14 @@ def main(argv=None):
     _plain_path(parent)
     parent.mkdir(exist_ok=True)
     output=parent/('result-'+datetime.now().strftime('%Y%m%d-%H%M%S')+'-'+uuid.uuid4().hex[:8])
-    result=import_reviewed_result(session.root,edited,output)
+    result=import_reviewed_result(session.root,edited,output,validation_mode='identity')
     items=[i for p in result.pages for i in p['items']]
     print(f'取り込み完了: {len(result.pages)}ページ / {len(items)}文字項目')
-    print('診断付き項目: '+str(sum(bool(i['diagnostics']) for i in items)))
+    print('除外した付箋: '+str(result.data['excluded_sticky_count']))
+    print('原本参照なし: '+str(sum(i['origin_evidence']['status']=='none' for i in items)))
+    print('不正な参照を持つ項目: '+str(sum(i['origin_evidence']['status'] in ('invalid','foreign','partial') for i in items)))
+    print('空文字・空白のみ: '+str(sum('EMPTY_TEXT' in i['diagnostics'] for i in items)))
+    print('検証: ID照合済み／ページ構造未検証')
     print('保存先: '+str(result.root))
     print('校正後JSONL: '+str(result.root/'reviewed.jsonl'))
     return 0

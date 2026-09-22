@@ -1,5 +1,7 @@
 # 保守・配布
 
+[Reviewed取り込み2.0の受け入れ条件と確認範囲](REVIEWED_IMPORT_V2_ACCEPTANCE.md)（Integrations 0.9.0開発候補）
+
 [v0.4.0の構成・互換性・公開検証条件](RELEASE_v0.4.0.md)
 
 以下の整理・0.8.0.dev1検証記録は、その時点の履歴です。現行のBAT接続と公開条件は上記を参照してください。

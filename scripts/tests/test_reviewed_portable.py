@@ -22,12 +22,13 @@ def test_one_document_import(tmp_path,monkeypatch,kind,capsys):
     edited=session/'review.xdw';edited.write_bytes(b'fixture')
     calls=[]
     monkeypatch.setattr(api,'load_review_session',lambda p:SimpleNamespace(root=Path(p).resolve()))
-    def take(s,e,out):
+    def take(s,e,out,*,validation_mode):
+        assert validation_mode=='identity'
         calls.append((s,e,out))
         assert out.parent==session.parent/'reviewed' and not out.exists()
         if kind=='api-failure':raise ValueError('mismatched document')
         out.mkdir()
-        return SimpleNamespace(root=out,pages=({'items':[]},))
+        return SimpleNamespace(root=out,pages=({'items':[]},),data={'excluded_sticky_count':0})
     monkeypatch.setattr(api,'import_reviewed_result',take)
     entry=helper()
     if kind=='multiple':

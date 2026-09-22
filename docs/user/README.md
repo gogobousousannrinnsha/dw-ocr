@@ -1,8 +1,10 @@
 # Portableの利用手順
 
+本書の取り込み規則はIntegrations 0.9.0を組み込む開発版向けです。公開済みPortableへの反映には別途配布が必要です。
+
 ## 導入と標準操作
 
-対象は[DW-OCR v0.4.0 Pre-release](https://github.com/gogobousousannrinnsha/dw-ocr/releases/tag/v0.4.0)です。結合ツールと同じReleaseにある全てのtransport ZIPを同じフォルダーに取得し、join_parts.batで復元ZIPを作り、新規の短い書込み可能な場所に展開します。部品数はsplit_manifest.jsonに記録されています。取得物・ZIP・展開先には20GB以上とOCR結果分の空きが必要です。旧版は保持します。
+公開済みPortableの導入元は[DW-OCR v0.4.1 Pre-release](https://github.com/gogobousousannrinnsha/dw-ocr/releases/tag/v0.4.1)です。結合ツールと同じReleaseにある全てのtransport ZIPを同じフォルダーに取得し、join_parts.batで復元ZIPを作り、新規の短い書込み可能な場所に展開します。部品数はsplit_manifest.jsonに記録されています。取得物・ZIP・展開先には20GB以上とOCR結果分の空きが必要です。旧版は保持します。
 
 Windows x64、対応DocuWorks製品・x64 DLL、NVIDIA GPUと対応ドライバーが必要です。Python 3.13.15、Paddle GPU 3.2.2、PaddleOCR 3.7.0、PaddleX 3.7.2、PP-OCRv6 mediumは同梱構成を使います。CPUへの自動切替はありません。
 
@@ -62,7 +64,7 @@ OCR開始.batを標準入口とします。ocr_rectangles.batは旧引数互換�
 
 校正結果取込.batには、編集済みXDWまたはreview-sessionフォルダーを1つ渡します。引数なしの場合はパスを入力します。別の場所へ保存したXDWでは、元のSessionフォルダーのパスを入力してください。Session一式は移動できます。取り込みにCanonicalは不要です。
 
-Viewerではinitial.xdwやJSONを編集せず、review.xdwを編集・保存して閉じます。Sessionの識別情報を失うと取り込めません。グループ・付箋の中のテキストとページ構成変更は全体を拒否します。再取り込みは新しい結果として保存し、過去の結果を上書きしません。
+Viewerではinitial.xdwやJSONを編集せず、review.xdwを編集・保存して閉じます。Sessionの識別情報を失うと取り込めません。開発版ではID照合中心で取り込み、付箋とその中の作業メモを本文から除外します。見た目だけ付箋に重なる通常テキストは残します。付箋以外のグループ内テキストは全体を拒否します。ページ追加・削除・並べ替え・寸法変更・ページ回転は対象外で、自動検出を保証しません。画面に「ID照合済み／ページ構造未検証」と表示します。参照なし項目数と不正な参照の項目数は別々に表示します。再取り込みは新しい結果として保存し、過去の結果を上書きしません。
 
 以前のCorrectionSetと1ページReview APIは従来どおり使えます。[APIの流れ](../api/README.md)を参照してください。新しいBATはReviewed Resultを扱います。検索・テンプレートは未実装です。
 

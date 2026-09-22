@@ -37,8 +37,8 @@
     },
     {
       "path": "docs/api/README.md",
-      "bytes": 2414,
-      "sha256": "a08663de79ddf8fa7aa9f25aec42cc52c028f3db5f5fd2690a786ffc402eb419"
+      "bytes": 2779,
+      "sha256": "7fd7b06f463881910c42cfbfdfa55fdc45a3a1e92645a45c1dd2080fc0d4f849"
     },
     {
       "path": "docs/api/review-regions.md",
@@ -51,9 +51,14 @@
       "sha256": "eca0a99d46f72c35a2f923e1f302c9864a828b38d14ec3d350e421638d5ef79a"
     },
     {
+      "path": "docs/api/reviewed-import-v2.md",
+      "bytes": 6332,
+      "sha256": "dfb1950e905923da6ab002a8f571410d28afd3a40d5d5f6dabee9bfd86779650"
+    },
+    {
       "path": "docs/api/reviewed-result.md",
-      "bytes": 1539,
-      "sha256": "fa64ec11ddaa735027a88bd017831c06b48e22ad8bb447e02f5fdf0b6c1cb4ce"
+      "bytes": 1723,
+      "sha256": "9717803ced236e5df9a53485f6d4fdae875f54b2298ebee330f31bd98e40f6dd"
     },
     {
       "path": "docs/api/setup.md",
@@ -572,8 +577,8 @@
     },
     {
       "path": "docs/maintainer/README.md",
-      "bytes": 4512,
-      "sha256": "173227eddf444812174c886c7b3ec31883e936963ce9b0ae31df1aa70ee42a45"
+      "bytes": 4647,
+      "sha256": "b21cf58d4fabd9f93a3b3222a71f3ef440401189ef2680e99ccf716236c55f8f"
     },
     {
       "path": "docs/maintainer/RELEASE_v0.4.0.md",
@@ -584,6 +589,11 @@
       "path": "docs/maintainer/reviewed-result-evidence.json",
       "bytes": 36321,
       "sha256": "7af3e0651aed9c02412cdf79de6dc553fda461544a49862359285ad8879416b6"
+    },
+    {
+      "path": "docs/maintainer/REVIEWED_IMPORT_V2_ACCEPTANCE.md",
+      "bytes": 5025,
+      "sha256": "d041501354ae1b528165bd484429b791ca6fd8333a7393ff97d5c7e2ad667fa1"
     },
     {
       "path": "docs/maintainer/REVIEWED_RESULT_VERIFICATION.md",
@@ -617,8 +627,18 @@
     },
     {
       "path": "docs/README.md",
-      "bytes": 1051,
-      "sha256": "c2858781f8f3d992f198063b0f36cc64180954d24c7cb6b3d406f39ce763048f"
+      "bytes": 1063,
+      "sha256": "c2c454384373739697169cca3391434bd21eed6457898c2cac96d686f2a24bcc"
+    },
+    {
+      "path": "docs/RECTANGLE_TEMPLATE.md",
+      "bytes": 8113,
+      "sha256": "d62b396e1325ae20523e02dbb0b3c864a3864041cdb9ecdd763143f1849812b6"
+    },
+    {
+      "path": "docs/RECTANGLE_TEMPLATE_VERIFICATION.md",
+      "bytes": 2889,
+      "sha256": "6d957836459c20b73c95465aa0fa29bd16343b2a6bd3e3f8330c3ca8cfcffb00"
     },
     {
       "path": "docs/RELEASE_0.7.0.md",
@@ -716,14 +736,29 @@
       "sha256": "ae5334e7bf2e45fc9156bf9b52fa83128abf2c75a83a66bc98bac9db6ef1d23c"
     },
     {
+      "path": "docs/specs/reviewed-import-1.0.md",
+      "bytes": 13308,
+      "sha256": "372ed6c7b81cfa018dafe8c80dbc192dbcf923c21129b49a5af1cb1d25103652"
+    },
+    {
+      "path": "docs/STRUCTURED_CSV.md",
+      "bytes": 6532,
+      "sha256": "3e7e1d8de76f8225a39f23e6a5ae692535e7fb625829a2ef05e48bc0836ca763"
+    },
+    {
+      "path": "docs/STRUCTURED_CSV_VERIFICATION.md",
+      "bytes": 2401,
+      "sha256": "d421e1a7f57c44fb9472c36ada84f37e952ca619cce6d39947a00caeb0726dc0"
+    },
+    {
       "path": "docs/UNIFIED_0.6.0.md",
       "bytes": 336,
       "sha256": "f12c3ff248644d5068d890957951ea9007e33a2127cf6ef5b205ae2698f6edf9"
     },
     {
       "path": "docs/user/README.md",
-      "bytes": 6975,
-      "sha256": "6968e420d5ba64ee858da2bcf65c6aa33332248fd8b5721b791ef5088579d9c3"
+      "bytes": 7602,
+      "sha256": "89f445eb4e08b342fb8fd7b34ab675b2079ef7a48dbfa2098b1a6b247fd8d74f"
     },
     {
       "path": "docs/VERIFICATION.md",
@@ -1212,8 +1247,8 @@
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/__init__.py",
-      "bytes": 1834,
-      "sha256": "df6433c18ca44377ef46bd138a9432e5988cab6568344bb32317f2131f7af10d"
+      "bytes": 2155,
+      "sha256": "ccf1cdd647ec377d4422bea46a046dc9d8bf742d279753eb51e4d544a8def7a3"
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/__main__.py",
@@ -1232,13 +1267,43 @@
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/_reviewed_sdk.py",
-      "bytes": 8373,
-      "sha256": "ccff0f06503fd1d9c7ed5f2c98eb74da30ca53253639f8d51aeb5300cb4d6478"
+      "bytes": 10071,
+      "sha256": "7b05ae5eae4c876e7ca3366450c5908e3b8d29d4dafc13390cb7c1c7a0f5033d"
+    },
+    {
+      "path": "packages/docuworks-integrations/docuworks_integrations/_reviewed_v2.py",
+      "bytes": 15022,
+      "sha256": "db9d4220f30a1abc24146f2e25aebfce764c6d811329d60cf23362552a8ff9ad"
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/_storage.py",
       "bytes": 4097,
       "sha256": "6b173f5cac295513e49cf0e11884c11a48ea13cf75423fb07a942f82e8c6de89"
+    },
+    {
+      "path": "packages/docuworks-integrations/docuworks_integrations/_structured_csv_cli.py",
+      "bytes": 1017,
+      "sha256": "c778a1c8991e76bfe2675964a37f3a508120a077dfe63ff02070ec869077286d"
+    },
+    {
+      "path": "packages/docuworks-integrations/docuworks_integrations/_template_cli.py",
+      "bytes": 2937,
+      "sha256": "709a2bbcd72d4a7d74ef5f372e3e718ced2f594bb137a5236c4e04f5300a9b1a"
+    },
+    {
+      "path": "packages/docuworks-integrations/docuworks_integrations/_template_extract.py",
+      "bytes": 4905,
+      "sha256": "d80a6b82043e143a43c3aba0e229421d01cf6a1905a84db9f3c6420c61006c86"
+    },
+    {
+      "path": "packages/docuworks-integrations/docuworks_integrations/_template_messages.py",
+      "bytes": 1164,
+      "sha256": "f14b1eb5e6bf35bc24b4377061049e4e1b4e0e7e66ee23a5dc47cb3281639771"
+    },
+    {
+      "path": "packages/docuworks-integrations/docuworks_integrations/_template_sdk.py",
+      "bytes": 2285,
+      "sha256": "3443da71ad0a7a1c1099b89c1be9c0ca231b4c55719c8a81a7879928b9e9abcf"
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/batch.py",
@@ -1247,8 +1312,8 @@
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/cli.py",
-      "bytes": 8694,
-      "sha256": "23769b1a7a6ad6a90c7a291fe7b0390e0bce0971076356c727fc4f45dac8cb6e"
+      "bytes": 10775,
+      "sha256": "dc101e1db175d2006b65b6b6f498bc89a7562c79d762488087db08ac98980216"
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/consumers.py",
@@ -1366,6 +1431,16 @@
       "sha256": "66bcf46c0ad322d46a683a0bb64caff91f8725f285cf3bcc06ae29de9bb67933"
     },
     {
+      "path": "packages/docuworks-integrations/docuworks_integrations/rectangle-template-1.0.schema.json",
+      "bytes": 5646,
+      "sha256": "6eb8b19d57443b4a3126464e6b9effe6371ded971c28f9271cef0c88c5806181"
+    },
+    {
+      "path": "packages/docuworks-integrations/docuworks_integrations/rectangle-template-manifest-1.0.schema.json",
+      "bytes": 848,
+      "sha256": "12271b5cfdcf2ea02454d4370a9c93d09b0c10b74832e9692c0e553ce7b3e482"
+    },
+    {
       "path": "packages/docuworks-integrations/docuworks_integrations/rendering.py",
       "bytes": 2321,
       "sha256": "f1af3ff53ae04712b8162daa03199b8cee6b9b0ab1aaed92156bb04b26aa4150"
@@ -1396,9 +1471,19 @@
       "sha256": "44e6d45a8004c47c7076d766e03d094e8e577853b00e70ff3ff468e3cf5965f7"
     },
     {
+      "path": "packages/docuworks-integrations/docuworks_integrations/reviewed-origins-2.0.schema.json",
+      "bytes": 1357,
+      "sha256": "d135d7feb23258dad74ce4a3c30a7dda38bd5dd50802189d63e8487bc8a93c6b"
+    },
+    {
       "path": "packages/docuworks-integrations/docuworks_integrations/reviewed-result-1.0.schema.json",
       "bytes": 6059,
       "sha256": "788605dda35415acff39181aa869bcd4d1002ee76496e4b3ff66043cd1026691"
+    },
+    {
+      "path": "packages/docuworks-integrations/docuworks_integrations/reviewed-result-2.0.schema.json",
+      "bytes": 8101,
+      "sha256": "2ae3731b985283df1762f0950ced7fa02d0fe11f717c7f1e30e839abc51965c5"
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/reviewed-result-manifest-1.0.schema.json",
@@ -1406,29 +1491,64 @@
       "sha256": "999c628c224d17eac1985af22b371a7cbe3a54979a3f97b7f248a4d935ed1824"
     },
     {
+      "path": "packages/docuworks-integrations/docuworks_integrations/reviewed-result-manifest-2.0.schema.json",
+      "bytes": 1281,
+      "sha256": "345e6be8b4d288f428add97cdb6d745adaeb4b5e3b18e3321d1aab6635139a0a"
+    },
+    {
       "path": "packages/docuworks-integrations/docuworks_integrations/reviewed-text-1.0.schema.json",
       "bytes": 3371,
       "sha256": "f6216bc2d967a519e09893fe423eb22e3e90774f54bab76f164f5466e9a14e92"
     },
     {
+      "path": "packages/docuworks-integrations/docuworks_integrations/reviewed-text-2.0.schema.json",
+      "bytes": 4784,
+      "sha256": "129240084178c47cb5ad29ac1af5a849e61ca598c41c7c3d1c6c5a36be8d690b"
+    },
+    {
       "path": "packages/docuworks-integrations/docuworks_integrations/reviewed.py",
-      "bytes": 25884,
-      "sha256": "9b174c7cf395f3622c14a0eb4d7c288c65725d0ec1aa9de6ccf6f1c8a02b2bfa"
+      "bytes": 27727,
+      "sha256": "9d99c95b27e5570081704bda20f0d317bc06b7b4a3411b50f28e862c7487d9b4"
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/REVIEWED_RESULT_FORMAT.md",
-      "bytes": 11251,
-      "sha256": "2fbdaf3499a5efdda543bdc2137451883a2f5b3d8ad45bf5024ac63399fab5e6"
+      "bytes": 14673,
+      "sha256": "3164bab2645550f6cfd339da4caa92fffaa3059d17b007c806ddac1617e2e13a"
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/reviewed_types.py",
-      "bytes": 1054,
-      "sha256": "714c71b1ffeb0fdf87ced9dc78c70fc322bf86470320be0cbcc52ff5965e40dc"
+      "bytes": 2528,
+      "sha256": "c2fb8a19eae458da7226a6ac674c8c96271654f6164cd6550cd20588d0731150"
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/settings.py",
       "bytes": 1814,
       "sha256": "b3749019463393178fc1859241588f87ced6e9abaca87e79c53aadc48510b281"
+    },
+    {
+      "path": "packages/docuworks-integrations/docuworks_integrations/structured-result-1.0.schema.json",
+      "bytes": 15432,
+      "sha256": "53b0e5a5f25f8ef090d891d501bdbfae27cc85558f3ce4c8ba8f3d455f1cd33f"
+    },
+    {
+      "path": "packages/docuworks-integrations/docuworks_integrations/structured-result-manifest-1.0.schema.json",
+      "bytes": 1652,
+      "sha256": "acdca957d8e061c5e84cebc253cc821ae87e6fc97b0bfd62d9730733a2958bfd"
+    },
+    {
+      "path": "packages/docuworks-integrations/docuworks_integrations/structured.py",
+      "bytes": 7262,
+      "sha256": "7badc36afffa80b6067a3f05949131cac19e0f0280f5476cc103ef8dd823ff09"
+    },
+    {
+      "path": "packages/docuworks-integrations/docuworks_integrations/structured_csv.py",
+      "bytes": 5490,
+      "sha256": "4f0d03e3769109e6248d58b77c4464f937a4f11a1aa7e4214974b56bc3e8fa3b"
+    },
+    {
+      "path": "packages/docuworks-integrations/docuworks_integrations/templates.py",
+      "bytes": 8850,
+      "sha256": "71ce8077c4bf33e2712dfbfb85b19e14d18e62746a7cfa6f8ddec7f9ea6f4a8b"
     },
     {
       "path": "packages/docuworks-integrations/docuworks_integrations/transforms.py",
@@ -1467,18 +1587,18 @@
     },
     {
       "path": "packages/docuworks-integrations/pyproject.toml",
-      "bytes": 958,
-      "sha256": "9c275534e5660fea926b1d5d8b0dacdfa3e894de823fb32f7980ce8f39e913ed"
+      "bytes": 959,
+      "sha256": "a6d790586fe723d13b42c979fb74e308587207e9c61dde1d7a696adf281b1781"
     },
     {
       "path": "packages/docuworks-integrations/README.md",
-      "bytes": 2102,
-      "sha256": "515f1f699578ff1ec319cc3e36781916a3af6320e78fd47368fe48eddaab5d5d"
+      "bytes": 2617,
+      "sha256": "94e1cd89dda76af58590264687b4b55e0e73c956ddc13d1a57028cc5e93e1748"
     },
     {
       "path": "packages/docuworks-integrations/REVIEWED_RESULT_FORMAT.md",
-      "bytes": 11251,
-      "sha256": "2fbdaf3499a5efdda543bdc2137451883a2f5b3d8ad45bf5024ac63399fab5e6"
+      "bytes": 14673,
+      "sha256": "3164bab2645550f6cfd339da4caa92fffaa3059d17b007c806ddac1617e2e13a"
     },
     {
       "path": "packages/docuworks-integrations/SETUP_PYTHON313.md",
@@ -1524,6 +1644,16 @@
       "path": "packages/docuworks-integrations/tests/integration/test_reviewed_roundtrip.py",
       "bytes": 6546,
       "sha256": "467f06567ea39c963e04ff1cf8f378d51e98a8000cdfa7f7d117590f9f10e4d5"
+    },
+    {
+      "path": "packages/docuworks-integrations/tests/integration/test_reviewed_v2_roundtrip.py",
+      "bytes": 7103,
+      "sha256": "3bbdfe45f337a57849ad5864a17e6d6acb5f29d4c0f2bebfc115287ee9e83746"
+    },
+    {
+      "path": "packages/docuworks-integrations/tests/integration/test_template_roundtrip.py",
+      "bytes": 5543,
+      "sha256": "a264a1e681e37ebd8de8f7e68d2382cef63e1ba7e60f4a3e78462ffd3c2de6af"
     },
     {
       "path": "packages/docuworks-integrations/tests/reviewed_fixture.py",
@@ -1616,9 +1746,34 @@
       "sha256": "3abc2d64a8f89740a5e8b20eb3dfdd08bd6093c663603277a5605531f2e63b74"
     },
     {
+      "path": "packages/docuworks-integrations/tests/test_reviewed_v2.py",
+      "bytes": 16942,
+      "sha256": "15e6a09e8af4d7b3c51d641c74e3642ab3e6f955eab60e9e626ef8eeb1b7c18f"
+    },
+    {
       "path": "packages/docuworks-integrations/tests/test_storage.py",
       "bytes": 8361,
       "sha256": "c866f0b951acbd86411fcf25d4e6b96c497de9986baa7711ebe9d7a8d2566b12"
+    },
+    {
+      "path": "packages/docuworks-integrations/tests/test_structured.py",
+      "bytes": 10893,
+      "sha256": "31a4fd70d66b59f5924b695397902f51f7980eec9ae5ee934b06130a1660fe16"
+    },
+    {
+      "path": "packages/docuworks-integrations/tests/test_structured_csv.py",
+      "bytes": 12201,
+      "sha256": "32754a66118b306116f210c4c5d5275ed2a91982426182f4afe54e2edf499476"
+    },
+    {
+      "path": "packages/docuworks-integrations/tests/test_template_extract.py",
+      "bytes": 5912,
+      "sha256": "78494aa147bcebbd25698f36f7b47464a057e251ff04dd313c8e4b786ac7f0e0"
+    },
+    {
+      "path": "packages/docuworks-integrations/tests/test_templates.py",
+      "bytes": 6220,
+      "sha256": "92cbad103c61179249026af8183317c7d45c8827963ac5eb3238389addb0b2ae"
     },
     {
       "path": "packages/docuworks-integrations/tests/test_unified.py",
@@ -1667,8 +1822,8 @@
     },
     {
       "path": "portable/scripts/import_reviewed.py",
-      "bytes": 2664,
-      "sha256": "9fcbf51683aa561c7fdac85df31163c58ed91d48ffd49ab3161f8c4cd87b2bc3"
+      "bytes": 3081,
+      "sha256": "4afd8a7e162af554a0d251139cdb9e34f9103491c704573c8f2c83b97734f3a6"
     },
     {
       "path": "portable/scripts/ocr_all_regions_to_rectangles.py",
@@ -1692,8 +1847,8 @@
     },
     {
       "path": "portable/templates/portable-readme.txt",
-      "bytes": 1096,
-      "sha256": "db6bcecbd7f7b113c8ac02371d076662bf51ee14b4421a221f30260ee6e23aed"
+      "bytes": 1485,
+      "sha256": "f63f46019b9e45e50e4ec2f90c070df21dd3583bbd9eb83c0ca7a841e5c74080"
     },
     {
       "path": "portable/templates/public-readme.txt",
@@ -1722,8 +1877,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 1250,
-      "sha256": "a7fd5b456de6a94211ada1861b21d545bb758d64e9bc2bcb599ec3f6b9c65883"
+      "bytes": 2067,
+      "sha256": "165fc4b3769da063b8313470aaad38b3909968ac051067ca8eeb4dfb16899117"
     },
     {
       "path": "requirements/dev.txt",
@@ -1786,6 +1941,11 @@
       "sha256": "1cde99fb98c36b8230f7572130bbbba9fd86eb29933cbfd534a4ded856b90b73"
     },
     {
+      "path": "scripts/generate_template_schemas.py",
+      "bytes": 4391,
+      "sha256": "74d8ab27f15fc5252d0a270bb36c6063954bffbb27259d57e0c08c9d91186d88"
+    },
+    {
       "path": "scripts/publication_policy.py",
       "bytes": 3440,
       "sha256": "35f55c49f782720da4316685415fb992fc37fa972eca01a02ecbcc9292e09b7f"
@@ -1837,8 +1997,8 @@
     },
     {
       "path": "scripts/tests/test_reviewed_portable.py",
-      "bytes": 2402,
-      "sha256": "233ac7ea6dbdec990f01c63287623575275cf7f062ff2d3ffafbdbc71a02fcf1"
+      "bytes": 2496,
+      "sha256": "72ea987d51e54ee6ca1e233005bdd9d7411d250bed40f69cbe7e3fcf89d02586"
     },
     {
       "path": "scripts/verify_models.py",
@@ -1852,8 +2012,8 @@
     },
     {
       "path": "scripts/verify_sdist.py",
-      "bytes": 3652,
-      "sha256": "18a765401f1f8b184cda3b20ac106c96696d52f19eef535913444d4af7d2779e"
+      "bytes": 3860,
+      "sha256": "44aee0a1f866e6bf706e94f503c4f6d59df34f4aaf3d5f6b8f8f7933de5e0d87"
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
