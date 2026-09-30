@@ -1,12 +1,12 @@
 # Portableの利用手順
 
-本書はDW-OCR v0.6.0 Pre-release（Core 1.0.1 / Integrations 0.12.0）の操作手順です。旧版v0.4.1にはテンプレート・CSV機能は含まれません。配布物の確認範囲はReleaseの検証報告を参照してください。
+本書はDW-OCR v0.6.1 Pre-release（Core 1.0.1 / Integrations 0.12.0）の操作手順です。旧版v0.4.1にはテンプレート・CSV機能は含まれません。配布物の確認範囲はReleaseの検証報告を参照してください。
 
 [テンプレート作成画面](template-editor.md)で見本を選び、Viewerで描いた矩形へ項目名・適用条件を設定し、登録・改訂できます。
 
 ## 導入と標準操作
 
-[DW-OCR v0.6.0 Pre-release](https://github.com/gogobousousannrinnsha/dw-ocr/releases/tag/v0.6.0)の配布物を使います。結合ツールと同じ版の全てのtransport ZIPを同じフォルダーに置き、join_parts.batで復元ZIPを作り、新規の短い書込み可能な場所に展開します。部品数はsplit_manifest.jsonに記録されています。取得物・ZIP・展開先には20GB以上とOCR結果分の空きが必要です。旧版は保持します。
+[DW-OCRのRelease一覧](https://github.com/gogobousousannrinnsha/dw-ocr/releases)からv0.6.1の配布物を使います。結合ツールと同じ版の全てのtransport ZIPを同じフォルダーに置き、join_parts.batで復元ZIPを作り、新規の短い書込み可能な場所に展開します。部品数はsplit_manifest.jsonに記録されています。取得物・ZIP・展開先には20GB以上とOCR結果分の空きが必要です。旧版は保持します。
 
 Windows x64、対応DocuWorks製品・x64 DLL、NVIDIA GPUと対応ドライバーが必要です。Python 3.13.15、Paddle GPU 3.2.2、PaddleOCR 3.7.0、PaddleX 3.7.2、PP-OCRv6 mediumは同梱構成を使います。CPUへの自動切替はありません。
 
@@ -15,8 +15,9 @@ Windows x64、対応DocuWorks製品・x64 DLL、NVIDIA GPUと対応ドライバ�
 3. 終了画面の保存先を開きます。エラーの詳細はjob.jsonに残ります。
 4. 表示されたreview.xdwをViewerで編集し、保存して閉じます。
 5. 編集済みXDWを「校正結果取込.bat」へドロップします。1文書ずつ取り込み、新しいReviewed ResultとJSONLを保存します。
-6. 「テンプレート作成.bat」で見本から矩形テンプレートを登録します。登録版を適用し、項目ごとの値を保存します。
-7. 同じ登録テンプレートの結果を選び、1文書1レコードのCSVへまとめます。手順は[テンプレートからCSVまで](template-csv.md)を参照してください。
+6. 帳票の種類ごとに初回だけ、「テンプレート作成.bat」で見本から矩形テンプレートを登録します。
+7. 「テンプレート適用.bat」で校正結果と登録版のフォルダーを選び、項目ごとの取得値・判定・保存先を確認します。結果はstructured/result-日時-IDへ新規保存します。[適用の操作手順](template-apply.md)を参照してください。
+8. 必要に応じて同じ登録テンプレートの結果を選び、1文書1レコードのCSVへまとめます。CSV出力はdocuworks-integrations.batへコマンドを入力します。手順は[テンプレートからCSVまで](template-csv.md)を参照してください。
 
 ## 出力と用語
 
@@ -73,7 +74,7 @@ OCR開始.batを標準入口とします。ocr_rectangles.batは旧引数互換�
 
 Viewerではinitial.xdwやJSONを編集せず、review.xdwを編集・保存して閉じます。Sessionの識別情報を失うと取り込めません。開発版ではID照合中心で取り込み、付箋とその中の作業メモを本文から除外します。見た目だけ付箋に重なる通常テキストは残します。付箋以外のグループ内テキストは全体を拒否します。ページ追加・削除・並べ替え・寸法変更・ページ回転は対象外で、自動検出を保証しません。画面に「ID照合済み／ページ構造未検証」と表示します。参照なし項目数と不正な参照の項目数は別々に表示します。再取り込みは新しい結果として保存し、過去の結果を上書きしません。
 
-以前のCorrectionSetと1ページReview APIは従来どおり使えます。[APIの流れ](../api/README.md)を参照してください。新しいBATはReviewed Resultを扱います。矩形テンプレートとCSVはdocuworks-integrations.batの各コマンドから実行します。検索機能は未実装です。
+以前のCorrectionSetと1ページReview APIは従来どおり使えます。[APIの流れ](../api/README.md)を参照してください。新しいBATはReviewed Resultを扱います。テンプレート適用は専用BAT、CSVはdocuworks-integrations.batのコマンドから実行します。各機能のCLI入口も維持しています。検索機能は未実装です。
 
 ## 失敗・制約
 
