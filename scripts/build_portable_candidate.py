@@ -21,7 +21,7 @@ def digest(path):
     with Path(path).open('rb') as stream: return hashlib.file_digest(stream,'sha256').hexdigest()
 
 
-def build(baseline, expected_hash, wheels, portable, output, *, release_version='v0.3.0', source=None):
+def build(baseline, expected_hash, wheels, portable, output, *, release_version='v0.3.0', source=None, dependency_wheels=()):
     baseline, wheels, portable, output=map(Path,(baseline,wheels,portable,output))
     if digest(baseline)!=expected_hash: raise ValueError('baseline SHA-256 mismatch')
     if output.exists(): raise FileExistsError(output)
@@ -54,6 +54,37 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
                 changes['runtime/Lib/site-packages/'+name]=archive.read(name)
                 origins['runtime/Lib/site-packages/'+name]='wheel'
     if set(versions)!={'docuworks-ctypes','docuworks-integrations'}: raise ValueError('unexpected wheel packages')
+    dependency_paths = list(map(Path, dependency_wheels))
+    dependencies = {}
+    for wheel in dependency_paths:
+        with zipfile.ZipFile(wheel) as archive:
+            metadata_names = [n for n in archive.namelist() if n.endswith('.dist-info/METADATA')]
+            if len(metadata_names) != 1: raise ValueError('ambiguous dependency metadata')
+            metadata = BytesParser().parsebytes(archive.read(metadata_names[0]))
+            package = metadata['Name'].lower().replace('_', '-')
+            if package != 'xlsxwriter' or metadata['Version'] != '3.2.9' or package in dependencies:
+                raise ValueError('unexpected dependency wheel')
+            dependencies[package] = metadata['Version']
+            changes['wheelhouse/' + wheel.name] = wheel.read_bytes()
+            origins['wheelhouse/' + wheel.name] = 'dependency-wheel'
+            for name in archive.namelist():
+                if name.endswith('/'): continue
+                if '\\' in name or PurePosixPath(name).is_absolute() or '..' in PurePosixPath(name).parts or ':' in name:
+                    raise ValueError('unsafe dependency wheel path')
+                if '.data/scripts/' in name:
+                    destination = 'runtime/Scripts/' + name.split('.data/scripts/', 1)[1]
+                elif '.data/' in name:
+                    raise ValueError('unsupported dependency data layout')
+                else:
+                    destination = 'runtime/Lib/site-packages/' + name
+                if destination in changes: raise ValueError('dependency overwrites project content')
+                changes[destination] = archive.read(name)
+                origins[destination] = 'dependency-wheel'
+            licenses = [n for n in archive.namelist() if n.endswith(('/LICENSE.txt', '/LICENSE'))]
+            if len(licenses) != 1: raise ValueError('missing dependency license')
+            changes['reference/XlsxWriter-LICENSE.txt'] = archive.read(licenses[0])
+    if 'runtime/Lib/site-packages/docuworks_integrations/reviewed_xlsx.py' in changes and not dependencies:
+        raise ValueError('Excel exporter requires its pinned dependency wheel')
     version=versions['docuworks-integrations']
     if not re.fullmatch(r'1\.\d+\.\d+',versions['docuworks-ctypes']) or not re.fullmatch(r'\d+\.\d+\.\d+',version):
         raise ValueError('expected stable Core 1.x and Integrations')
@@ -68,6 +99,10 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
             module=package.replace('-','_')
             if f'version = "{expected}"' not in project_metadata or f'__version__ = "{expected}"' not in changes[f'runtime/Lib/site-packages/{module}/__init__.py'].decode('utf-8'):
                 raise ValueError('source/wheel/runtime version mismatch: '+package)
+        for name in ('LICENSE', 'LICENSE_NOTICE.md', 'THIRD_PARTY_NOTICES.md'):
+            if (source/name).is_file():
+                changes[name] = (source/name).read_bytes()
+                origins[name] = 'source'
         for folder in ('docs','examples','packages','requirements','scripts'):
             for path in (source/folder).rglob('*'):
                 if path.is_file() and not any(part in ('__pycache__','build','dist','.pytest_cache','integration-artifacts') or part.endswith('.egg-info') for part in path.relative_to(source).parts):
@@ -76,20 +111,26 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
                     if name not in changes:
                         changes[name]=path.read_bytes()
                         origins[name]='source'
+    if (portable/'README_AB.md').is_file():
+        changes['README_AB.md'] = (portable/'README_AB.md').read_bytes()
     changes['README.txt']=render_readme(portable, 'portable_readme', versions, release_version).encode('utf-8-sig')
     # Package/Core documentation links to the source root README as well.
-    changes['README.md']=render_readme(portable, 'public_readme', versions, release_version).encode('utf-8')
+    changes['README.md']=render_readme(portable, 'public_readme', versions, release_version).replace('(portable/README_AB.md)', '(README_AB.md)').encode('utf-8')
     repair='repair_project_wheels.bat'
     if repair in changes:
         text=changes[repair].decode('utf-8-sig')
         for package, selected_version in versions.items():
-            text=re.sub(re.escape(package)+r'==\d+\.\d+\.\d+',package+'=='+selected_version,text)
+            text=re.sub(re.escape(package)+r'==[^\s"]+',package+'=='+selected_version,text)
+        if dependencies and 'XlsxWriter==3.2.9' not in text:
+            text=text.replace('docuworks-integrations=='+version,'docuworks-integrations=='+version+' XlsxWriter==3.2.9')
         changes[repair]=text.encode('utf-8')
     changes['PROVENANCE.txt']=(f'DW-OCR {release_version} Pre-release\nBaseline archive SHA256: '+expected_hash+
         f"\nCore {versions['docuworks-ctypes']}; Integrations {version}; Python 3.13.15\n"+
-        '\n'.join(w.name+' SHA256 '+digest(w) for w in wheel_paths)+'\n').encode()
+        '\n'.join(w.name+' SHA256 '+digest(w) for w in [*wheel_paths,*dependency_paths])+'\n').encode()
     changes['reference/project-wheels.json']=json.dumps({w.name:digest(w) for w in wheel_paths},indent=2).encode()
-    for folder in ('INPUT','OUTPUT','runs','cache','templates','template-drafts'): changes[folder+'/']=b''
+    if dependency_paths:
+        changes['reference/dependency-wheels.json']=json.dumps({w.name:digest(w) for w in dependency_paths},indent=2).encode()
+    for folder in ('INPUT','OUTPUT','runs','cache','templates','template-drafts','logs'): changes[folder+'/']=b''
     origins.update({name:'generated' for name in changes if name not in origins})
     inventory_name='reference/distribution-files.json'
     removed=[]
@@ -105,7 +146,7 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
                 lower.startswith(('wheelhouse/','runtime/lib/site-packages/docuworks_integrations',
                                   'runtime/lib/site-packages/docuworks_ctypes')) or
                 lower.startswith(('docs/','examples/','packages/','requirements/','scripts/')) or
-                lower == inventory_name or
+                lower in (inventory_name, 'reference/installed-packages.json') or
                 lower in ('sha256sums.txt','tools_sha256sums.txt','tools_provenance.json','installed_packages.txt',
                           'pip_check.txt','readme_tools_ja.txt','public_packaging_changes.txt')):
                 removed.append(name)
@@ -132,6 +173,17 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
                     out.fp.write(chunk); remaining-=len(chunk)
                 out.filelist.append(new); out.NameToInfo[name]=new; out.start_dir=out.fp.tell()
             for name,data in sorted(changes.items()): out.writestr(name,data)
+    installed = []
+    with zipfile.ZipFile(output) as archive:
+        for name in archive.namelist():
+            if name.startswith('runtime/Lib/site-packages/') and name.endswith('.dist-info/METADATA'):
+                metadata = BytesParser().parsebytes(archive.read(name))
+                installed.append(dict(name=metadata['Name'], version=metadata['Version']))
+    installed_name = 'reference/installed-packages.json'
+    with zipfile.ZipFile(output, 'a', zipfile.ZIP_DEFLATED) as archive:
+        if installed_name in archive.namelist(): raise ValueError('stale installed package inventory')
+        archive.writestr(installed_name, json.dumps(sorted(installed, key=lambda p: p['name'].lower()), indent=2).encode())
+    origins[installed_name] = 'generated'
     entries=[]
     with zipfile.ZipFile(output) as archive:
         for info in archive.infolist():
@@ -196,6 +248,7 @@ if __name__=='__main__':
     p.add_argument('--helper-baseline',type=Path)
     p.add_argument('--release-version',default='v0.3.0')
     p.add_argument('--source',type=Path)
+    p.add_argument('--dependency-wheel', action='append', type=Path, default=[])
     a=p.parse_args()
-    print(json.dumps(build(a.baseline,a.baseline_sha256,a.wheels,a.portable,a.output,release_version=a.release_version,source=a.source)),flush=True)
+    print(json.dumps(build(a.baseline,a.baseline_sha256,a.wheels,a.portable,a.output,release_version=a.release_version,source=a.source,dependency_wheels=a.dependency_wheel)),flush=True)
     if a.split_dir: print(json.dumps(split(a.output,a.split_dir,a.helper_baseline)),flush=True)

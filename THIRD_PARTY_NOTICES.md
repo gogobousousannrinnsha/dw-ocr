@@ -1,5 +1,7 @@
 # 第三者資産と対応ソース
 
+v0.7.0の全文Excel出力にはXlsxWriter 3.2.9（BSD-2-Clause）を追加しています。原文ライセンスはPortableの`reference/XlsxWriter-LICENSE.txt`とruntimeのdist-info内に保持します。固定版wheelのSHA-256は`reference/dependency-wheels.json`、実際のパッケージ一覧は`reference/installed-packages.json`に記録します。下記の公開済みパッケージ一覧とは版を区別してください。
+
 Python、Paddle、PaddleX、PaddleOCR、モデル、GPUランタイムその他の第三者資産は各ライセンスで提供します。元のLICENSE・NOTICEは削除していません。配布ZIPの`runtime/LICENSE.txt`、`runtime/Lib/site-packages/*dist-info/`等を参照してください。
 
 PP-OCRv6 mediumの[検出モデル](https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_det)と[認識モデル](https://huggingface.co/PaddlePaddle/PP-OCRv6_medium_rec)は公式カードでApache-2.0と表示されています。モデルの出所・ファイルhashを保持し、Apache本文とNOTICEを追加しました。

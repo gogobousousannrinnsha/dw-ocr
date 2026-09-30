@@ -102,12 +102,15 @@ def _parser() -> argparse.ArgumentParser:
     csv_export.add_argument('--entry', action='append', nargs=2, required=True,
                             metavar=('RESULT_DIR', 'DOCUMENT_NAME'), help='結果フォルダーと文書名。文書ごとに繰り返し指定')
     csv_export.add_argument('--output', required=True, type=Path)
+    xlsx_export = subparsers.add_parser('export-reviewed-xlsx', help='校正結果の通常テキスト全文をExcelへ出力')
+    xlsx_export.add_argument('--reviewed-dir', required=True, type=Path)
+    xlsx_export.add_argument('--output', required=True, type=Path)
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
-    if argv and argv[0] in ('template-editor', 'register-template', 'check-template', 'apply-template', 'export-structured-csv', '--help', '-h'):
+    if argv and argv[0] in ('template-editor', 'register-template', 'check-template', 'apply-template', 'export-structured-csv', 'export-reviewed-xlsx', '--help', '-h'):
         # Windows CI/redirection may default to cp1252, which cannot print Japanese.
         # Scope this output contract to the new commands and the shared help text.
         for stream in (sys.stdout, sys.stderr):
@@ -115,6 +118,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 stream.reconfigure(encoding='utf-8')
     parser = _parser()
     args = parser.parse_args(argv)
+    if args.command == 'export-reviewed-xlsx':
+        from ._reviewed_xlsx_cli import run
+        return run(args)
     if args.command == 'template-editor':
         from .template_editor import launch
         return launch(args.app_root)

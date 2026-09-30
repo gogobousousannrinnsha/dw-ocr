@@ -16,7 +16,7 @@ def hashes(root):
             for p in root.rglob('*') if p.is_file()}
 
 
-def verify(archive, output):
+def verify(archive, output, *, dependency_path=None):
     archive, output = Path(archive).resolve(), Path(output).resolve()
     output.mkdir(parents=True, exist_ok=False)
     unpacked = output / 'source'
@@ -44,7 +44,13 @@ def verify(archive, output):
     if not (source / 'tests/conftest.py').is_file():
         raise ValueError('sdist must supply tests/conftest.py')
     before = hashes(unpacked)
-    env = dict(os.environ, PYTHONPATH=str(source), PYTHONDONTWRITEBYTECODE='1',
+    search_path = str(source)
+    if dependency_path is not None:
+        dependency_path = Path(dependency_path).resolve()
+        if not dependency_path.is_dir() or (dependency_path / 'docuworks_integrations').exists():
+            raise ValueError('dependency path must contain only external dependencies')
+        search_path += os.pathsep + str(dependency_path)
+    env = dict(os.environ, PYTHONPATH=search_path, PYTHONDONTWRITEBYTECODE='1',
                DOCUWORKS_INTEGRATIONS_TEST_TMP=str(output / 'temp'))
     probe = 'import docuworks_integrations as p; from pathlib import Path; import sys; assert Path(p.__file__).is_relative_to(Path(sys.argv[1]))'
     subprocess.run([sys.executable, '-c', probe, str(source)], cwd=output, env=env, check=True)
@@ -53,7 +59,7 @@ def verify(archive, output):
                              'tests/test_paddle_blank.py', 'tests/test_reviewed.py', 'tests/test_reviewed_v2.py',
                              'tests/test_reviewed_jobs.py', 'tests/test_templates.py',
                              'tests/test_template_extract.py', 'tests/test_structured.py', 'tests/test_structured_csv.py',
-                             'tests/test_template_authoring.py', 'tests/test_template_editor.py',
+                             'tests/test_template_authoring.py', 'tests/test_template_editor.py', 'tests/test_reviewed_xlsx.py',
                              '-q', '-p', 'no:cacheprovider',
                              '--junitxml=' + str(output / 'junit.xml')], cwd=source, env=env)
     after = hashes(unpacked)
@@ -73,5 +79,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('archive', type=Path)
     parser.add_argument('output', type=Path)
+    parser.add_argument('--dependency-path', type=Path, help='Optional external test libraries; extracted source still takes precedence')
     args = parser.parse_args()
-    print(json.dumps(verify(args.archive, args.output), indent=2))
+    print(json.dumps(verify(args.archive, args.output, dependency_path=args.dependency_path), indent=2))

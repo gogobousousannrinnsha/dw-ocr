@@ -1,8 +1,10 @@
-# DW-OCR v0.6.1
+# DW-OCR v0.7.0
 
-Core 1.0.1 / Integrations 0.12.0。Windows x64用Pre-releaseです。
+Core 1.0.1 / Integrations 0.13.0。Windows x64用Pre-releaseです。
 
+- [一括・分割の選択と比較](portable/README_AB.md)
 - [利用者向け操作・設定・保存先](docs/user/README.md)
+- [校正結果の全文Excel出力](docs/user/reviewed-excel.md)
 - [矩形テンプレートからCSV一覧まで](docs/user/template-csv.md)
 - [テンプレート作成画面と改訂](docs/user/template-editor.md)
 - [テンプレート適用BAT](docs/user/template-apply.md)
@@ -14,7 +16,7 @@ OCR開始.batは全ページOCR・白紙Review・矩形付きXDW・確認画像�
 
 テンプレート作成.batで見本を選び、Viewerで描いた複数の矩形へ項目名・適用条件を設定して登録・改訂できます。下書きはtemplate-drafts、登録版と改訂用の見本はtemplatesへ保存します。テンプレート適用.batで校正結果と登録版を選び、取得値・判定・保存先を確認します。結果はstructured/result-日時-IDへ新規保存します。同じ登録版の結果を1文書1レコードのCSVへまとめる場合は、docuworks-integrations.batのexport-structured-csvを使います。
 
-取り込み・テンプレート・作成画面の自動試験は合成文書を使った確認です。Viewer手操作・フォルダー選択画面の手操作・Excel画面・実帳票・DocuWorks 9.1は未確認です。[構成と検証方針](docs/maintainer/RELEASE_v0.6.1.md)と、Releaseに添付する最終検証報告を参照してください。旧版は保持し、新しいフォルダーへ展開してください。
+取り込み・テンプレート・作成画面の自動試験は合成文書を使った確認です。Viewer手操作・フォルダー選択画面の手操作・Excel画面・実帳票・DocuWorks 9.1は未確認です。[構成と検証方針](docs/maintainer/RELEASE_v0.7.0.md)と、Releaseに添付する最終検証報告を参照してください。旧版は保持し、新しいフォルダーへ展開してください。
 
 自作部分はMIT、第三者資産は各条件を維持します。SDK・DLL・実文書は同梱しません。[ライセンス](LICENSE) ／ [第三者条件](THIRD_PARTY_NOTICES.md)
 

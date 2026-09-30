@@ -13,6 +13,7 @@ from .discovery import collect_documents, check_source
 from .derivatives import annotate_rectangles, render_text_maps, resolve_font, IntegrityError
 from .results import load_ocr_result, export_jsonl, sha256
 from ._storage import atomic_json, check_publish_access, note
+from ._performance import measure
 
 
 def _journal(folder, payload):
@@ -20,7 +21,8 @@ def _journal(folder, payload):
 
 
 def process_documents(inputs, output_dir, runs_dir, model_root, *, settings=None,
-                      dll_path=None, excluded=(), engine=None, review=False):
+                      dll_path=None, excluded=(), engine=None, review=False,
+                      review_creation_mode='document'):
     """Fresh job directories; shared engine; all pages in one run per document.
 
     Returns a job dictionary with exit_code 0/1/130. Invalid preflight raises.
@@ -29,6 +31,8 @@ def process_documents(inputs, output_dir, runs_dir, model_root, *, settings=None
     settings = settings or Settings()
     if not isinstance(settings,Settings): raise TypeError('settings must be Settings')
     if type(review) is not bool: raise TypeError('review must be bool')
+    if review_creation_mode not in ('document', 'page_join'):
+        raise ValueError('review_creation_mode must be document or page_join')
     stages = ('ocr', 'review', 'rectangles', 'text_maps', 'jsonl') if review else ('ocr', 'rectangles', 'text_maps', 'jsonl')
     output, runs = Path(output_dir).resolve(), Path(runs_dir).resolve()
     if output.is_relative_to(runs) or runs.is_relative_to(output):
@@ -74,6 +78,9 @@ def process_documents(inputs, output_dir, runs_dir, model_root, *, settings=None
                 if record[stage]=='DISABLED': continue
                 if stage!='ocr' and record['ocr']!='SUCCEEDED': continue
                 active=(record,stage); record[stage]='RUNNING'; _journal(output,job)
+                observation = measure(stage, document_id=record['document_id'])
+                observation.__enter__()
+                stage_error = None
                 try:
                     if stage=='ocr':
                         try:
@@ -91,7 +98,8 @@ def process_documents(inputs, output_dir, runs_dir, model_root, *, settings=None
                                       source_sha256=initial)
                     elif stage=='review':
                         from .reviewed import create_review_session
-                        session=create_review_session(run,doc_output/'review-session',dll_path=dll_path)
+                        review_options = {} if review_creation_mode == 'document' else dict(review_creation_mode=review_creation_mode)
+                        session=create_review_session(run,doc_output/'review-session',dll_path=dll_path,**review_options)
                         record.update(review_id=session.review_id,review_manifest_sha256=session.manifest_sha256)
                     elif stage=='rectangles':
                         annotate_rectangles(run,doc_output/'annotated.xdw',dll_path=dll_path,
@@ -104,6 +112,7 @@ def process_documents(inputs, output_dir, runs_dir, model_root, *, settings=None
                     else: export_jsonl(load_ocr_result(run),doc_output/'regions.jsonl')
                     record[stage]='SUCCEEDED'
                 except (Exception,KeyboardInterrupt) as exc:
+                    stage_error = exc
                     record[stage]='FAILED'
                     scope=getattr(exc,'_ocr_failure_scope',failure_scope(exc,'render' if stage in ('rectangles','review') else 'source'))
                     if isinstance(exc,(IntegrityError,SourceChangedError)) or getattr(exc,'_ocr_cleanup_failed',False):
@@ -112,6 +121,8 @@ def process_documents(inputs, output_dir, runs_dir, model_root, *, settings=None
                         notes=getattr(exc,'__notes__',[]),diagnostics=getattr(exc,'_ocr_diagnostics',None)))
                     if scope!='document': raise
                 finally:
+                    observation.__exit__(type(stage_error) if stage_error else None, stage_error,
+                                         stage_error.__traceback__ if stage_error else None)
                     record['elapsed_seconds']=time.perf_counter()-t
                     primary=sys.exc_info()[1]
                     try:

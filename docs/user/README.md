@@ -1,6 +1,8 @@
 # Portableの利用手順
 
-本書はDW-OCR v0.6.1 Pre-release（Core 1.0.1 / Integrations 0.12.0）の操作手順です。旧版v0.4.1にはテンプレート・CSV機能は含まれません。配布物の確認範囲はReleaseの検証報告を参照してください。
+校正結果取込の後に[全文Excel出力](reviewed-excel.md)も使えます。テンプレートを使わず通常テキスト全件を出力します。
+
+本書はDW-OCR v0.7.0 Pre-release（Core 1.0.1 / Integrations 0.13.0）の操作手順です。旧版v0.4.1にはテンプレート・CSV機能は含まれません。配布物の確認範囲はReleaseの検証報告を参照してください。
 
 [テンプレート作成画面](template-editor.md)で見本を選び、Viewerで描いた矩形へ項目名・適用条件を設定し、登録・改訂できます。
 
@@ -18,6 +20,8 @@ Windows x64、対応DocuWorks製品・x64 DLL、NVIDIA GPUと対応ドライバ�
 6. 帳票の種類ごとに初回だけ、「テンプレート作成.bat」で見本から矩形テンプレートを登録します。
 7. 「テンプレート適用.bat」で校正結果と登録版のフォルダーを選び、項目ごとの取得値・判定・保存先を確認します。結果はstructured/result-日時-IDへ新規保存します。[適用の操作手順](template-apply.md)を参照してください。
 8. 必要に応じて同じ登録テンプレートの結果を選び、1文書1レコードのCSVへまとめます。CSV出力はdocuworks-integrations.batへコマンドを入力します。手順は[テンプレートからCSVまで](template-csv.md)を参照してください。
+
+一括・分割の選択は`ocr開始（一括）.bat` / `ocr開始（分割）.bat`を使います。分割は校正用XDWの作成方式であり、OCRの途中保存・再開ではありません。
 
 ## 出力と用語
 
