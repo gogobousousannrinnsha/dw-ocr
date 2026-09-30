@@ -3,6 +3,7 @@ import ctypes
 import json
 import shutil
 from pathlib import Path
+from ._performance import measure
 
 from docuworks_ctypes.document import Annotation, Page
 from docuworks_ctypes.errors import XdwError
@@ -140,18 +141,11 @@ class ReviewSdk:
             return [(p._page_info().nWidth / 100, p._page_info().nHeight / 100)
                     for p in (doc.page(n) for n in range(1, doc.page_count + 1))]
 
-    def create(self, identity, identity_hash, output):
-        from PIL import Image
-        from docuworks_ctypes import OpenMode, PointMM, Color
+    def _blank(self, white, part, p):
         from docuworks_ctypes._raw import types as T, constants as C
         from docuworks_ctypes.encoding import wchar_buffer
         from docuworks_ctypes.errors import check_result
-        output = Path(output)
-        white = output.parent / 'white.bmp'
-        Image.new('1', (100, 100), 1).save(white, dpi=(100, 100))
-        parts = []
-        for p in identity['pages']:
-            part = output.parent / f"blank-{p['page']}.xdw"
+        with measure('review.blank', page=p['page']):
             options = T.XDW_CREATE_OPTION()
             options.nSize = ctypes.sizeof(options)
             options.nFitImage = C.XDW_CREATE_USERDEF
@@ -160,29 +154,86 @@ class ReviewSdk:
             options.nZoom = 100
             check_result(self.api.raw.XDW_CreateXdwFromImageFileW(wchar_buffer(str(white)),
                          wchar_buffer(str(part)), ctypes.byref(options)), 'create blank review page')
-            parts.append(part)
-        shutil.copyfile(parts[0], output)
-        common = dict(review_id=identity['review_id'], identity_sha256=identity_hash)
-        with self.api.open_document(output, mode=OpenMode.UPDATE) as doc:
-            for n, part in enumerate(parts[1:], 2):
-                check_result(doc.raw.XDW_InsertDocumentW(doc.handle, n, wchar_buffer(str(part)), None), 'insert review page')
-            value = encoded(common)
-            check_result(doc.raw.XDW_SetUserAttribute(doc.handle, DOC_ATTRIBUTE, value, len(value), None), 'set review document identity')
-            for p in identity['pages']:
-                value = encoded(dict(common, page_id=p['page_id']))
-                check_result(doc.raw.XDW_SetPageUserAttribute(doc.handle, p['page'], PAGE_ATTRIBUTE,
+
+    @staticmethod
+    def _document_identity(doc, common):
+        from docuworks_ctypes.errors import check_result
+        value = encoded(common)
+        check_result(doc.raw.XDW_SetUserAttribute(doc.handle, DOC_ATTRIBUTE, value, len(value), None), 'set review document identity')
+
+    @staticmethod
+    def _populate(doc, local_page, p, common):
+        from docuworks_ctypes import PointMM, Color
+        from docuworks_ctypes.errors import check_result
+        with measure('review.text', page=p['page'], item_count=len(p['items'])):
+            value = encoded(dict(common, page_id=p['page_id']))
+            check_result(doc.raw.XDW_SetPageUserAttribute(doc.handle, local_page, PAGE_ATTRIBUTE,
                              value, len(value), None), 'set review page identity')
-                page = _BlankReviewPage(doc.page(p['page'])) if p['items'] else None
-                for source in p['items']:
-                    a = page.add_text(PointMM(source['x'], source['y']), source['text'],
+            page = _BlankReviewPage(doc.page(local_page)) if p['items'] else None
+            for source in p['items']:
+                a = page.add_text(PointMM(source['x'], source['y']), source['text'],
                                                    font_size=12, fore_color=Color.RED, back_color=Color.NONE)
-                    a.set_standard_attribute_raw('%TextDirection', 0)
-                    a.set_standard_attribute_raw('%TextOrientation', 0)
-                    a.set_standard_attribute('%WordWrap', False)
-                    a.set_user_attribute(TEXT_ATTRIBUTE.decode('ascii'), encoded(dict(common,
+                a.set_standard_attribute_raw('%TextDirection', 0)
+                a.set_standard_attribute_raw('%TextOrientation', 0)
+                a.set_standard_attribute('%WordWrap', False)
+                a.set_user_attribute(TEXT_ATTRIBUTE.decode('ascii'), encoded(dict(common,
                                          annotation_id=source['annotation_id'], region_id=source['region_id'])))
-            doc.save()
-        # These temporary inputs were created solely by this invocation.
+
+    @staticmethod
+    def _merge(doc, parts):
+        from docuworks_ctypes.encoding import wchar_buffer
+        from docuworks_ctypes.errors import check_result
+        with measure('review.merge'):
+            for n, part in enumerate(parts[1:], 2):
+                with measure('review.insert', page=n):
+                    check_result(doc.raw.XDW_InsertDocumentW(doc.handle, n, wchar_buffer(str(part)), None), 'insert review page')
+
+    def create(self, identity, identity_hash, output):
+        """A: preserve the baseline's blank-join, annotate-all, save-once order."""
+        return self._create(identity, identity_hash, output, page_join=False)
+
+    def create_page_join(self, identity, identity_hash, output):
+        """B: save and close annotated single pages before joining them."""
+        return self._create(identity, identity_hash, output, page_join=True)
+
+    def _create(self, identity, identity_hash, output, *, page_join):
+        from PIL import Image
+        from docuworks_ctypes import OpenMode
+        import sys
+        output = Path(output)
+        if output.exists():
+            raise FileExistsError(output)
+        white = output.parent / 'white.bmp'
+        Image.new('1', (100, 100), 1).save(white, dpi=(100, 100))
+        parts = []
+        common = dict(review_id=identity['review_id'], identity_sha256=identity_hash)
+        count = len(identity['pages'])
+        for p in identity['pages']:
+            part = output.parent / f"blank-{p['page']}.xdw"
+            self._blank(white, part, p)
+            if page_join:
+                with measure('review.single_page', page=p['page']):
+                    with self.api.open_document(part, mode=OpenMode.UPDATE) as doc:
+                        self._document_identity(doc, common)
+                        self._populate(doc, 1, p, common)
+                        with measure('review.save', page=p['page']):
+                            doc.save()
+                print(f"Review page saved: {p['page']}/{count}", file=sys.stderr, flush=True)
+            parts.append(part)
+        with measure('review.copy_first'):
+            shutil.copyfile(parts[0], output)
+        with self.api.open_document(output, mode=OpenMode.UPDATE) as doc:
+            print(f'Review merge: {count} pages', file=sys.stderr, flush=True)
+            self._merge(doc, parts)
+            self._document_identity(doc, common)
+            if not page_join:
+                for p in identity['pages']:
+                    self._populate(doc, p['page'], p, common)
+                    print(f"Review text placed: {p['page']}/{count}", file=sys.stderr, flush=True)
+            print('Review final save', file=sys.stderr, flush=True)
+            with measure('review.save_final'):
+                doc.save()
+        # Temporary inputs belong to this session's existing owned staging directory.
         for part in parts:
             part.unlink()
         white.unlink()

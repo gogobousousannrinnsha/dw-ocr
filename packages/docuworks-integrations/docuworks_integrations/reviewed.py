@@ -306,8 +306,11 @@ def _match_pages(snapshot, identity, identity_hash):
             raise ValueError(f"page {expected['page']}: identity/order/dimensions/rotation changed")
 
 
-def create_review_session(run_dir, output_dir, *, dll_path=None) -> ReviewSession:
+def create_review_session(run_dir, output_dir, *, dll_path=None,
+                          review_creation_mode='document') -> ReviewSession:
     """Create immutable initial.xdw + metadata and an editable review.xdw, outside Canonical."""
+    if review_creation_mode not in ('document', 'page_join'):
+        raise ValueError('review_creation_mode must be document or page_join')
     original = load_ocr_result(run_dir)
     output = _destination(output_dir, original.root)
     count = original.source.get('page_count')
@@ -329,11 +332,15 @@ def create_review_session(run_dir, output_dir, *, dll_path=None) -> ReviewSessio
     identity_bytes = _bytes(identity); identity_hash = _digest(identity_bytes)
     with owned_directory(output.parent, '.review-session-') as staging:
         (staging / 'identity.json').write_bytes(identity_bytes)
-        generator = backend.create(identity, identity_hash, staging / 'initial.xdw')
-        snapshot = backend.inspect(staging / 'initial.xdw')
-        _match_pages(snapshot, identity, identity_hash)
+        from ._performance import measure
+        create = backend.create if review_creation_mode == 'document' else backend.create_page_join
+        with measure('review.create'):
+            generator = create(identity, identity_hash, staging / 'initial.xdw')
+        with measure('review.inspect'):
+            snapshot = backend.inspect(staging / 'initial.xdw')
+            _match_pages(snapshot, identity, identity_hash)
         from . import __version__
-        generator.update(integrations=__version__)
+        generator.update(integrations=__version__, review_creation_mode=review_creation_mode)
         data = dict(schema=SESSION_SCHEMA, schema_version=VERSION, review_id=identity['review_id'],
                     identity_sha256=identity_hash, created_at=_now(), generator=generator,
                     initial_sha256=sha256(staging / 'initial.xdw'), pages=[])

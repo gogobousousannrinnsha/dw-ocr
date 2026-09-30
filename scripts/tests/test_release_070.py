@@ -48,6 +48,32 @@ def setup_case(root):
     return repo,public,wheels,baseline,bat
 
 
+def test_portable_includes_pinned_excel_dependency_and_scripts(tmp_path):
+    repo, _, wheels, baseline, _ = setup_case(tmp_path)
+    dependency = tmp_path / 'xlsxwriter.whl'
+    with zipfile.ZipFile(dependency, 'w') as z:
+        z.writestr('xlsxwriter/__init__.py', '__version__ = "3.2.9"\n')
+        z.writestr('xlsxwriter-3.2.9.dist-info/METADATA', 'Name: xlsxwriter\nVersion: 3.2.9\n')
+        z.writestr('xlsxwriter-3.2.9.dist-info/licenses/LICENSE.txt', 'BSD test license')
+        z.writestr('xlsxwriter-3.2.9.data/scripts/vba_extract.py', '#!python\n# helper\n')
+    output = tmp_path / 'portable.zip'
+    build(baseline, digest(baseline), wheels, repo/'portable', output, source=repo, dependency_wheels=[dependency])
+    with zipfile.ZipFile(output) as z:
+        assert z.read('runtime/Scripts/vba_extract.py') == b'#!python\n# helper\n'
+        assert z.read('reference/XlsxWriter-LICENSE.txt') == b'BSD test license'
+        assert 'XlsxWriter==3.2.9' in z.read('repair_project_wheels.bat').decode()
+        assert 'xlsxwriter.whl' in json.loads(z.read('reference/dependency-wheels.json'))
+        assert {'name': 'xlsxwriter', 'version': '3.2.9'} in json.loads(z.read('reference/installed-packages.json'))
+
+
+def test_excel_feature_requires_dependency_at_build(tmp_path):
+    repo, _, wheels, baseline, _ = setup_case(tmp_path)
+    with zipfile.ZipFile(next(wheels.glob('docuworks_integrations-*.whl')), 'a') as z:
+        z.writestr('docuworks_integrations/reviewed_xlsx.py', '# exporter\n')
+    with pytest.raises(ValueError, match='requires its pinned dependency'):
+        build(baseline, digest(baseline), wheels, repo/'portable', tmp_path/'bad.zip', source=repo)
+
+
 def test_public_export_includes_docs_examples_and_preserves_bat(tmp_path):
     repo,public,_,_,bat=setup_case(tmp_path)
     (public/'docs').mkdir()

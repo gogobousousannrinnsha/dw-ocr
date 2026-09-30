@@ -3,3 +3,5 @@ setuptools==84.0.0
 wheel==0.48.0
 Pillow==12.3.0
 jsonschema==4.26.0
+XlsxWriter==3.2.9
+openpyxl==3.1.5
