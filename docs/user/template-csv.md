@@ -1,8 +1,8 @@
 # テンプレートからCSVまで
 
-DW-OCR v0.6.0 Pre-release / Integrations 0.12.0向けの手順です。
+DW-OCR v0.6.1 Pre-release / Integrations 0.12.0向けの手順です。
 コマンドは実装済みです。Viewerの手操作による一連の確認は未実施です。
-公開済みv0.4.1では利用できません。確認範囲は[配布構成と検証方針](../maintainer/RELEASE_v0.6.0.md)と、Releaseに添付する最終検証報告を参照してください。
+公開済みv0.4.1では利用できません。確認範囲は[配布構成と検証方針](../maintainer/RELEASE_v0.6.1.md)と、Releaseに添付する最終検証報告を参照してください。
 
 テンプレートの準備には[テンプレート作成画面](template-editor.md)を使えます。画面で登録済みの場合は手順2・3を省き、手順4のテンプレートパスを実際の登録先（例：`templates\帳簿A\v001`）へ置き換えてください。手順2・3は従来の手動設定・CLI登録の方法です。
 
@@ -52,6 +52,8 @@ DW-OCR v0.6.0 Pre-release / Integrations 0.12.0向けの手順です。
 矩形・項目名・条件を変えるときは、作成用XDWを修正して「帳簿A-002」など新しいフォルダーへ登録します。
 
 ## 4. 文書ごとに項目を取得する
+
+`テンプレート適用.bat`を開き、校正結果と登録版を選びます。[選択画面から適用する手順](template-apply.md)を参照してください。引数や保存先を指定する場合は、従来どおり以下のコマンドも使えます。
 
 次の「OUTPUT\job-例\doc-000001\reviewed\result-例」は実在するReviewedの保存先へ置き換えます。
 check-templateは保存せずに確認し、apply-templateが新しいStructured Resultを保存します。

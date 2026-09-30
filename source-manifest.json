@@ -577,8 +577,8 @@
     },
     {
       "path": "docs/maintainer/README.md",
-      "bytes": 4801,
-      "sha256": "bd085d5879ffc4bd3d2f24a976d278c5595fc647af5cb17df20b6ef976203028"
+      "bytes": 4804,
+      "sha256": "4e10399e26fca40dcc2af3cb076f5174ad65f41d7ccde18144ef2356dc979ca6"
     },
     {
       "path": "docs/maintainer/RELEASE_v0.4.0.md",
@@ -594,6 +594,11 @@
       "path": "docs/maintainer/RELEASE_v0.6.0.md",
       "bytes": 3249,
       "sha256": "80d3c09f74c7a07c52ce275702f2e60034571b4c014c7f05a704cfcd815ea2a0"
+    },
+    {
+      "path": "docs/maintainer/RELEASE_v0.6.1.md",
+      "bytes": 1917,
+      "sha256": "a6a01dee5959c21b35621088750ca41e2c76999e3cbe9a8913d6d3c2ef0ce48e"
     },
     {
       "path": "docs/maintainer/reviewed-result-evidence.json",
@@ -772,13 +777,18 @@
     },
     {
       "path": "docs/user/README.md",
-      "bytes": 8672,
-      "sha256": "09a75f2ce18d7cafc89137fec98b4ae8308719d915fc48a498f026feb212f9e6"
+      "bytes": 9092,
+      "sha256": "4b17c2aaf19b8b60e95f8b34d6673d9ec1309b2718b4f5b2797646ba1d2983a9"
+    },
+    {
+      "path": "docs/user/template-apply.md",
+      "bytes": 3042,
+      "sha256": "168bbdf591c4bac56aeb80bbe006589bf48d3f89e80ed20072846c7beefcd63f"
     },
     {
       "path": "docs/user/template-csv.md",
-      "bytes": 7637,
-      "sha256": "c4e050413af55b871ea9457a49c73e03d87d2b1f448359f1fb540af4d754313f"
+      "bytes": 7911,
+      "sha256": "7dc93ccc3a5043abb3a19c9b1611bedb64773cea19b6dbcaca27810e0ff6a7a6"
     },
     {
       "path": "docs/user/template-editor.md",
@@ -1852,8 +1862,8 @@
     },
     {
       "path": "portable/layout.json",
-      "bytes": 918,
-      "sha256": "06f5009854cd890aac0c17dea8200639b94c01558c99e41df6bf72f69b833899"
+      "bytes": 1007,
+      "sha256": "6de8a83b90b3bb04ab5c8e6798cc41e320f3adeff42ad98e7f9f223f4ca8bfbb"
     },
     {
       "path": "portable/ocr_rectangles.bat",
@@ -1866,7 +1876,7 @@
       "sha256": "7973af2643985a09f04818bd78bc1fbf62edc62fefcac076dfc1b5a3765f28ed"
     },
     {
-      "path": "portable/OCR\u958b\u59cb.bat",
+      "path": "portable/OCR開始.bat",
       "bytes": 274,
       "sha256": "b16367278e7b5893bd71e488ca40cefbaa02637c1b9777b519d6e064e6b15472"
     },
@@ -1879,6 +1889,11 @@
       "path": "portable/repair_project_wheels.bat",
       "bytes": 385,
       "sha256": "f68394e68bc82efc7ccfb56d97600fa4eb2419ffe81f4e6ea2b12b8f18e1f694"
+    },
+    {
+      "path": "portable/scripts/apply_template.py",
+      "bytes": 3723,
+      "sha256": "3b56f3cf3526ead9c61a0040e5c23a6f98d35aec80e5f9bc71d2064c210c8fda"
     },
     {
       "path": "portable/scripts/generate_bundle_text_maps.py",
@@ -1912,13 +1927,13 @@
     },
     {
       "path": "portable/templates/portable-readme.txt",
-      "bytes": 2286,
-      "sha256": "b1b1f409cfabacd0413cc62c5340b4b0a0d99e0291b61ba51cd8a81a2f28a364"
+      "bytes": 2578,
+      "sha256": "ca7f5b0cc491ff313ff4040288de24fef6f435a86656c3e48d2cf77a1c49993d"
     },
     {
       "path": "portable/templates/public-readme.txt",
-      "bytes": 2125,
-      "sha256": "7bdde69c442b145a2ea7f6be1156bc16091abae650d126564c26e2a26fe1e6c9"
+      "bytes": 2302,
+      "sha256": "51183eeda739169337be40fd91361b34502405efc4cfb2f58afb84458d29dea3"
     },
     {
       "path": "portable/text_maps.bat",
@@ -1936,19 +1951,24 @@
       "sha256": "59701d16b8469307c0bedf699d14e2523f6ea620224b0ce8e873cf1d62c39ccb"
     },
     {
-      "path": "portable/\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u4f5c\u6210.bat",
+      "path": "portable/テンプレート作成.bat",
       "bytes": 177,
       "sha256": "55a040300e1393e0cb2eb28bbce10d290c85f42b08604dc3d8cbbd171ddce235"
     },
     {
-      "path": "portable/\u6821\u6b63\u7d50\u679c\u53d6\u8fbc.bat",
+      "path": "portable/テンプレート適用.bat",
+      "bytes": 393,
+      "sha256": "f908556ab02a91803070cdfa7d7c1142295e416b2b2bb93fb36a404d1416bb5d"
+    },
+    {
+      "path": "portable/校正結果取込.bat",
       "bytes": 280,
       "sha256": "683c5209cb060d6037bc99104b36fb0f21a09ddc9db6ee5bd835b2892902ead5"
     },
     {
       "path": "README.md",
-      "bytes": 2098,
-      "sha256": "d13ccfd6ad08bc67b0e6ee4d4839e028b02bceaf28f1b50411fcc8327d496343"
+      "bytes": 2273,
+      "sha256": "b3847ad8613b7d4a96a5ecb8f56d697a3f3888baf6887cf502657a39dc4f5497"
     },
     {
       "path": "requirements/dev.txt",
@@ -2069,6 +2089,11 @@
       "path": "scripts/tests/test_reviewed_portable.py",
       "bytes": 2496,
       "sha256": "72ea987d51e54ee6ca1e233005bdd9d7411d250bed40f69cbe7e3fcf89d02586"
+    },
+    {
+      "path": "scripts/tests/test_template_apply_portable.py",
+      "bytes": 3966,
+      "sha256": "9a7a977630a05a3442415cea8adc8663f875395fa6361dba6513a01904ae35d4"
     },
     {
       "path": "scripts/verify_models.py",
