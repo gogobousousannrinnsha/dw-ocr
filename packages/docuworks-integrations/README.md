@@ -1,4 +1,6 @@
-# docuworks-integrations 0.12.0
+# docuworks-integrations 0.14.0
+
+0.14.0では[元OCRの確認一覧](../../docs/user/ocr-review-report.md)を追加します。領域ID・原本座標・認識文字・信頼度を保持し、確認が必要な理由をJSONへ出力します。元結果を書き換えず、訂正は既存の採用・Reviewed経路で保存します。0.13.0の校正用XDW作成方式の選択と全文Excel出力を維持します。以下の0.12.0以前の記述は履歴です。
 
 保存済みOCR結果を中心に、OCR実行・矩形と確認画像・文字訂正・編集用XDWを提供します。Core 1.0.1を使用します。
 
@@ -8,14 +10,14 @@
 
 この開発候補ではPaddleの空文字・空白だけの認識結果を除外し、正常文字を保持して処理を継続します。
 不正な座標・信頼度・非文字列は引き続き拒否します。この空文字対策は公開Portable v0.4.0にも反映済みです。
-[再現手順と検証範囲](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.6.0/docs/maintainer/PADDLE_BLANK_TEXT.md)
+[再現手順と検証範囲](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.8.0/docs/maintainer/PADDLE_BLANK_TEXT.md)
 
-- [全体のAPI案内](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.6.0/docs/api/README.md)
+- [全体のAPI案内](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.8.0/docs/api/README.md)
 - [保存形式とAPIの正本](OCR_RESULT_FORMAT.md)
 - [白紙Review・独立したReviewed Result 1.0の仕様とAPI](REVIEWED_RESULT_FORMAT.md)
-- [訂正の検証・保存・適用](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.6.0/docs/api/corrections.md)
-- [編集用XDW：1ページ内の指定領域](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.6.0/docs/api/review-regions.md)
-- [利用手順](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.6.0/docs/user/README.md) ／ [検証範囲](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.6.0/docs/history/README.md)
+- [訂正の検証・保存・適用](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.8.0/docs/api/corrections.md)
+- [編集用XDW：1ページ内の指定領域](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.8.0/docs/api/review-regions.md)
+- [利用手順](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.8.0/docs/user/README.md) ／ [検証範囲](https://github.com/gogobousousannrinnsha/dw-ocr/blob/v0.8.0/docs/history/README.md)
 
 標準OCRのBATは全ページOCR・白紙Review・矩形・確認画像と任意JSONLを生成します。校正結果取込BATは1文書ずつ独立したReviewed Resultへ取り込みます。元runを変更せず、文字以外の座標・順序・信頼度を維持します。
 

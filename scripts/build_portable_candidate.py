@@ -21,7 +21,7 @@ def digest(path):
     with Path(path).open('rb') as stream: return hashlib.file_digest(stream,'sha256').hexdigest()
 
 
-def build(baseline, expected_hash, wheels, portable, output, *, release_version='v0.3.0', source=None, dependency_wheels=()):
+def build(baseline, expected_hash, wheels, portable, output, *, release_version='v0.3.0', source=None, dependency_wheels=(), baseline_prefix=None):
     baseline, wheels, portable, output=map(Path,(baseline,wheels,portable,output))
     if digest(baseline)!=expected_hash: raise ValueError('baseline SHA-256 mismatch')
     if output.exists(): raise FileExistsError(output)
@@ -36,7 +36,7 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
             # ASCII BAT syntax and a Japanese filename; CRLF for cmd.exe.
             changes[name]=changes[name].replace(b'\r\n',b'\n').replace(b'\n',b'\r\n')
     wheel_paths=sorted(wheels.glob('*.whl'))
-    if len(wheel_paths)!=2: raise ValueError('Exactly Core and Integrations wheels required')
+    if len(wheel_paths) not in (2, 3): raise ValueError('Core and Integrations, with optional Workbench wheels required')
     versions={}
     for wheel in wheel_paths:
         changes['wheelhouse/'+wheel.name]=wheel.read_bytes()
@@ -53,7 +53,8 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
                     raise ValueError('unexpected wheel data layout')
                 changes['runtime/Lib/site-packages/'+name]=archive.read(name)
                 origins['runtime/Lib/site-packages/'+name]='wheel'
-    if set(versions)!={'docuworks-ctypes','docuworks-integrations'}: raise ValueError('unexpected wheel packages')
+    if set(versions) not in ({'docuworks-ctypes','docuworks-integrations'}, {'docuworks-ctypes','docuworks-integrations','dw-workbench'}):
+        raise ValueError('unexpected wheel packages')
     dependency_paths = list(map(Path, dependency_wheels))
     dependencies = {}
     for wheel in dependency_paths:
@@ -97,8 +98,15 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
         for package, expected in versions.items():
             project_metadata=(source/'packages'/package/'pyproject.toml').read_text(encoding='utf-8')
             module=package.replace('-','_')
-            if f'version = "{expected}"' not in project_metadata or f'__version__ = "{expected}"' not in changes[f'runtime/Lib/site-packages/{module}/__init__.py'].decode('utf-8'):
+            source_init=(source/'packages'/package/module/'__init__.py').read_text(encoding='utf-8')
+            if ((package != 'dw-workbench' and f'version = "{expected}"' not in project_metadata)
+                    or f'__version__ = "{expected}"' not in source_init
+                    or f'__version__ = "{expected}"' not in changes[f'runtime/Lib/site-packages/{module}/__init__.py'].decode('utf-8')):
                 raise ValueError('source/wheel/runtime version mismatch: '+package)
+        if 'dw-workbench' in versions:
+            workbench_project=(source/'packages/dw-workbench/pyproject.toml').read_text(encoding='utf-8')
+            if f'docuworks-integrations=={version}' not in workbench_project:
+                raise ValueError('Workbench companion version mismatch')
         for name in ('LICENSE', 'LICENSE_NOTICE.md', 'THIRD_PARTY_NOTICES.md'):
             if (source/name).is_file():
                 changes[name] = (source/name).read_bytes()
@@ -123,36 +131,62 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
             text=re.sub(re.escape(package)+r'==[^\s"]+',package+'=='+selected_version,text)
         if dependencies and 'XlsxWriter==3.2.9' not in text:
             text=text.replace('docuworks-integrations=='+version,'docuworks-integrations=='+version+' XlsxWriter==3.2.9')
+        if 'dw-workbench' in versions:
+            text=text.replace('docuworks-integrations=='+version,'docuworks-integrations=='+version+' dw-workbench=='+versions['dw-workbench'])
         changes[repair]=text.encode('utf-8')
+    if 'dw-workbench' in versions:
+        workbench_wheel=next(w for w in wheel_paths if w.name.startswith('dw_workbench-'))
+        changes['BUILD.json']=json.dumps(dict(application='DW-Workbench / DW-OCR',version=versions['dw-workbench'],
+            release_version=release_version,status='local-validation-candidate',baseline_sha256=expected_hash,
+            wheel_sha256=digest(workbench_wheel),components=versions,
+            source_manifest_sha256=digest(Path(source)/'source-manifest.json') if (Path(source)/'source-manifest.json').is_file() else None,
+            initial_projects_empty=True,initial_settings_empty=True,published=False),indent=2).encode()
     changes['PROVENANCE.txt']=(f'DW-OCR {release_version} Pre-release\nBaseline archive SHA256: '+expected_hash+
         f"\nCore {versions['docuworks-ctypes']}; Integrations {version}; Python 3.13.15\n"+
+        (f"DW-Workbench {versions['dw-workbench']}\n" if 'dw-workbench' in versions else '')+
         '\n'.join(w.name+' SHA256 '+digest(w) for w in [*wheel_paths,*dependency_paths])+'\n').encode()
     changes['reference/project-wheels.json']=json.dumps({w.name:digest(w) for w in wheel_paths},indent=2).encode()
     if dependency_paths:
         changes['reference/dependency-wheels.json']=json.dumps({w.name:digest(w) for w in dependency_paths},indent=2).encode()
-    for folder in ('INPUT','OUTPUT','runs','cache','templates','template-drafts','logs'): changes[folder+'/']=b''
+    for folder in ('INPUT','OUTPUT','runs','cache','templates','template-drafts','logs','projects','settings'): changes[folder+'/']=b''
     origins.update({name:'generated' for name in changes if name not in origins})
     inventory_name='reference/distribution-files.json'
     removed=[]
     with zipfile.ZipFile(baseline) as original:
-        for name in original.namelist():
+        prefix = baseline_prefix.rstrip('/')+'/' if baseline_prefix else ''
+        if prefix and (PurePosixPath(prefix).is_absolute() or '..' in PurePosixPath(prefix).parts or ':' in prefix or '\\' in prefix):
+            raise ValueError('unsafe baseline prefix')
+        infos = []
+        for info in original.infolist():
+            if prefix and not info.filename.startswith(prefix):
+                raise ValueError('baseline member outside fixed prefix')
+            normalized = copy.copy(info)
+            normalized.filename = info.filename[len(prefix):]
+            if normalized.filename:
+                infos.append(normalized)
+        if len(infos) != len(set(i.filename for i in infos)):
+            raise ValueError('duplicate normalized ZIP member')
+        for name in [i.filename for i in infos]:
             if name.endswith('.bat') and '/' not in name and name not in layout['files']:
-                raise ValueError('unmanaged baseline launcher: '+name)
+                if not prefix:
+                    raise ValueError('unmanaged baseline launcher: '+name)
+                # A prefixed public Workbench baseline contributes vendor assets only.
+                removed.append(name)
         # Keep all third-party binary/model/license content, replace only own package/entrypoints.
-        for name in original.namelist():
+        for name in [i.filename for i in infos]:
             lower=name.lower()
-            if ('__pycache__' in lower or lower.endswith('.pyc') or
+            if ((prefix and (not lower.startswith(('runtime/','models/','licenses/')) or lower=='licenses/vendor-manifest.json'))
+                or '__pycache__' in lower or lower.endswith('.pyc') or
                 lower.startswith(('templates/','template-drafts/')) or
                 lower.startswith(('wheelhouse/','runtime/lib/site-packages/docuworks_integrations',
-                                  'runtime/lib/site-packages/docuworks_ctypes')) or
+                                  'runtime/lib/site-packages/docuworks_ctypes','runtime/lib/site-packages/dw_workbench')) or
                 lower.startswith(('docs/','examples/','packages/','requirements/','scripts/')) or
                 lower in (inventory_name, 'reference/installed-packages.json') or
                 lower in ('sha256sums.txt','tools_sha256sums.txt','tools_provenance.json','installed_packages.txt',
                           'pip_check.txt','readme_tools_ja.txt','public_packaging_changes.txt')):
                 removed.append(name)
         with zipfile.ZipFile(output,'x',zipfile.ZIP_DEFLATED,allowZip64=True) as out, baseline.open('rb') as raw:
-            infos=original.infolist()
-            if len(infos)!=len(set(i.filename for i in infos)): raise ValueError('duplicate ZIP member')
+            if len(original.infolist())!=len(set(i.filename for i in original.infolist())): raise ValueError('duplicate ZIP member')
             for index,info in enumerate(infos):
                 name=info.filename
                 if name in changes:
@@ -162,11 +196,19 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
                 if PurePosixPath(name).is_absolute() or '..' in PurePosixPath(name).parts or ':' in name:
                     raise ValueError('unsafe ZIP path')
                 if info.flag_bits&1: raise ValueError('encrypted baseline member')
-                end=infos[index+1].header_offset if index+1<len(infos) else original.start_dir
                 new=copy.copy(info); new.header_offset=out.fp.tell()
                 out._writecheck(new); out._didModify=True
                 raw.seek(info.header_offset)
-                remaining=end-info.header_offset
+                header=raw.read(30)
+                if len(header)!=30 or header[:4]!=b'PK\x03\x04': raise ValueError('invalid baseline local header')
+                name_length, extra_length=struct.unpack_from('<HH',header,26)
+                raw.seek(name_length+extra_length,1)
+                # Known CRC/sizes remove the need for a trailing data descriptor.
+                # Rewrite the local filename when stripping the fixed public root.
+                new.flag_bits &= ~8
+                new.extra=b''
+                out.fp.write(new.FileHeader(new.file_size>=zipfile.ZIP64_LIMIT or new.compress_size>=zipfile.ZIP64_LIMIT))
+                remaining=info.compress_size
                 while remaining:
                     chunk=raw.read(min(8*1024*1024,remaining))
                     if not chunk: raise EOFError('truncated baseline')
@@ -184,6 +226,20 @@ def build(baseline, expected_hash, wheels, portable, output, *, release_version=
         if installed_name in archive.namelist(): raise ValueError('stale installed package inventory')
         archive.writestr(installed_name, json.dumps(sorted(installed, key=lambda p: p['name'].lower()), indent=2).encode())
     origins[installed_name] = 'generated'
+    if prefix:
+        # The inherited inventory describes an older application. Replace it with
+        # hashes of the vendor bytes actually retained in this new Portable.
+        vendor_name='licenses/vendor-manifest.json'
+        vendor=[]
+        with zipfile.ZipFile(output) as archive:
+            for info in archive.infolist():
+                if not info.is_dir() and info.filename != vendor_name and origins[info.filename]=='baseline':
+                    with archive.open(info) as stream:
+                        vendor.append(dict(path=info.filename,bytes=info.file_size,sha256=hashlib.file_digest(stream,'sha256').hexdigest()))
+        with zipfile.ZipFile(output,'a',zipfile.ZIP_DEFLATED) as archive:
+            if vendor_name in archive.namelist(): raise ValueError('stale vendor inventory')
+            archive.writestr(vendor_name,json.dumps(vendor,indent=2).encode())
+        origins[vendor_name]='generated'
     entries=[]
     with zipfile.ZipFile(output) as archive:
         for info in archive.infolist():
@@ -248,7 +304,8 @@ if __name__=='__main__':
     p.add_argument('--helper-baseline',type=Path)
     p.add_argument('--release-version',default='v0.3.0')
     p.add_argument('--source',type=Path)
+    p.add_argument('--baseline-prefix',help='Fixed root folder of a public Workbench vendor ZIP')
     p.add_argument('--dependency-wheel', action='append', type=Path, default=[])
     a=p.parse_args()
-    print(json.dumps(build(a.baseline,a.baseline_sha256,a.wheels,a.portable,a.output,release_version=a.release_version,source=a.source,dependency_wheels=a.dependency_wheel)),flush=True)
+    print(json.dumps(build(a.baseline,a.baseline_sha256,a.wheels,a.portable,a.output,release_version=a.release_version,source=a.source,dependency_wheels=a.dependency_wheel,baseline_prefix=a.baseline_prefix)),flush=True)
     if a.split_dir: print(json.dumps(split(a.output,a.split_dir,a.helper_baseline)),flush=True)

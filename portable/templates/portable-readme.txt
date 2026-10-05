@@ -1,6 +1,15 @@
 DW-OCR @RELEASE_VERSION@ / Integrations @INTEGRATIONS_VERSION@ / Core @CORE_VERSION@
 Windows x64用Pre-releaseです。旧版と別の新しいフォルダーへ展開してください。
 
+DW-Workbench 0.4.0はWorkbench開始.batで起動します。
+文書登録→読取設定→OCR→確認・訂正→Excel出力→台帳・注釈を案内します。
+案件はprojects、共通設定はsettingsへ保存します。初期状態は空です。
+操作説明はdocs/WORKFLOW_UI_JA.md、台帳はdocs/LEDGER_MARKUP_JA.md。
+別PCの条件と移動方法はdocs/user/portable-transfer.mdを参照してください。
+DocuWorks本体・XDWAPI・NVIDIAドライバーは同梱しません。移動先にも導入が必要です。
+GPU OCRが使えないPCでは手入力・確認・保存・表出力を利用できます。
+OCR確認一覧.batは元OCR領域の低信頼度・空欄などを確認一覧にします。
+
 INPUTへXDWを入れてOCR開始.batを実行、またはXDW・フォルダーをドロップします。
 ocr開始（一括）.bat / ocr開始（分割）.batで校正用XDWの作成方式を選べます。
 分割はページ別に校正用XDWを作り最後に結合します。両方とも毎回OCRし、途中再開はありません。

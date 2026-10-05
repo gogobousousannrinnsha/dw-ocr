@@ -3,6 +3,10 @@
   "schema_version": "1.0",
   "provenance": "Launchers are source-managed here. Reviewed import, template authoring/application and full-text Excel export have dedicated entries; exporters delegate to the public CLI.",
   "files": [
+    "Workbench開始.bat",
+    "workbench/launch.bat",
+    "OCR確認一覧.bat",
+    "scripts/review_report.py",
     "全文Excel出力.bat",
     "scripts/export_reviewed_xlsx.py",
     "ocr開始（一括）.bat",

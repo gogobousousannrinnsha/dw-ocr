@@ -28,12 +28,15 @@ def export(repo, baseline_public, output, *, release_version='v0.3.0'):
     output.mkdir(parents=True)
     for name in ('LICENSE','LICENSE_NOTICE.md','THIRD_PARTY_NOTICES.md'):
         shutil.copyfile(baseline_public/name,output/name)
-    for name in ('docuworks-ctypes','docuworks-integrations'):
+    package_names = ['docuworks-ctypes', 'docuworks-integrations']
+    if (repo/'packages/dw-workbench').is_dir():
+        package_names.append('dw-workbench')
+    for name in package_names:
         source=repo/'packages'/name
         destination=output/'packages'/name
         shutil.copytree(source,destination,ignore=shutil.ignore_patterns(
             '__pycache__','*.pyc','*.egg-info','build','dist','.pytest_cache','integration-artifacts',
-            'template-drafts','sample-reviewed'))
+            'template-drafts','sample-reviewed','pytest-cache-files-*'))
         metadata=destination/'pyproject.toml'
         text=metadata.read_text(encoding='utf-8').replace('license = {text = "Proprietary"}',
                                                         'license = {text = "MIT"}')
@@ -41,7 +44,7 @@ def export(repo, baseline_public, output, *, release_version='v0.3.0'):
         shutil.copyfile(baseline_public/'LICENSE',destination/'LICENSE')
     for folder in ('portable','requirements','docs','examples','scripts'):
         shutil.copytree(repo/folder,output/folder,dirs_exist_ok=True,ignore=shutil.ignore_patterns(
-            '__pycache__','*.pyc','template-drafts','sample-reviewed'))
+            '__pycache__','*.pyc','template-drafts','sample-reviewed','pytest-cache-files-*'))
     if (repo/'.github').is_dir():
         shutil.copytree(repo/'.github',output/'.github')
     for name in ('.gitattributes','.gitignore'):
@@ -65,6 +68,10 @@ def export(repo, baseline_public, output, *, release_version='v0.3.0'):
         text=re.sub(pattern,public,text)
         text=text.replace('cd docuworks-ocr', 'cd dw-ocr')
         text=re.sub(r'`[A-Za-z0-9_-]+/docuworks-ocr`','`gogobousousannrinnsha/dw-ocr`',text)
+        if path.suffix == '.md':
+            # Historical acceptance notes can name the author's local install.
+            # Keep the notes, but remove that location from distributable copies.
+            text=re.sub(r'(?i)[A-Z]:[\\/]+(?:Users|ai)[\\/]+[^`"\r\n]*', 'REDACTED_LOCAL_PATH', text)
         if path.suffix=='.json':
             def portable_evidence(value):
                 if isinstance(value,dict): return {k:portable_evidence(v) for k,v in value.items()}
