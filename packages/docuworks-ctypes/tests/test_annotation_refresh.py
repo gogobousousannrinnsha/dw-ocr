@@ -100,4 +100,3 @@ def test_handle_mismatch_raises_without_synthetic_fallback():
     page = _page(AddRaw(returned_handle=99, enumerated_handle=100))
     with pytest.raises(AnnotationRefreshError):
         page._add(AnnotationType.TEXT, PointMM(1, 2))
-

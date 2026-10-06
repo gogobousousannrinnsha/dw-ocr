@@ -348,4 +348,3 @@ def test_output_page_order(tmp_path):
     corrections = save_corrections(saved.root, [edit()], tmp_path / 'corrections.json')
     out = export_effective_jsonl(apply_corrections(saved.root, corrections), tmp_path / 'out.jsonl')
     assert [json.loads(line)['page'] for line in out.read_text(encoding='utf-8').splitlines()] == [1, 2]
-
